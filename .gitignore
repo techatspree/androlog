@@ -1,0 +1,6 @@
+# Androlog git ignore
+target*
+bin*
+.settings*
+.project
+.classpath
