@@ -16,7 +16,7 @@ File base configuration
 Create a file in the sdcard root directory.
 Inside, define a property:
 androlog.active = true
-These class provide several log level. For each level, a method is associated:
+The Log class provides several log levels. For each level, a method is associated:
 ERROR : Log.e
 WARN : Log.w
 INFO : Log.i
