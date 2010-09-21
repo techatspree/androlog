@@ -115,7 +115,7 @@ public class AndrologTest extends TestCase {
         String tag = "de.akquinet.gomobile.androlog.test.AndrologTest";
         String message = "This is a INFO test";
         Exception ex = new NullPointerException();
-        int expected = tag.length() + message.length() + 3 + 904; // Size of the
+        int expected = tag.length() + message.length() + 3 + 905; // Size of the
                                                                     // stack
                                                                     // trace
         int x = Log.i(this, message, ex);
