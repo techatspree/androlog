@@ -94,4 +94,20 @@
     <developerConnection>scm:git:git@github.com:akquinet/androlog.git</developerConnection>
   </scm>
 
+  <distributionManagement>
+    <repository>
+      <id>${repo.releases.id}</id>
+      <name>${repo.releases.name}</name>
+      <url>${repo.releases.url}</url>
+      <uniqueVersion>false</uniqueVersion>
+    </repository>
+
+    <snapshotRepository>
+      <id>${repo.snapshots.id}</id>
+      <name>${repo.snapshots.name}</name>
+      <url>${repo.snapshots.url}</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+  </distributionManagement>
+
 </project>
