@@ -30,8 +30,9 @@ import android.content.Context;
 import android.os.Environment;
 
 /**
- * Implements a small layer on top of {@link android.util.Log} to provide
- * programmatic enabling and disabling of logging.
+ * Implements a small layer on top of the
+ * <a href="http://developer.android.com/reference/android/util/Log.html">Android Log</a>
+ * to provide programmatic enabling and disabling of logging.
  */
 public class Log {
     /**
@@ -351,9 +352,6 @@ public class Log {
     /**
      * Send a {@link #VERBOSE} log message and log the exception.
      *
-     * @param tag
-     *            Used to identify the source of a log message. It usually
-     *            identifies the class or activity where the log call occurs.
      * @param msg
      *            The message you would like logged.
      * @param tr
@@ -437,9 +435,6 @@ public class Log {
     /**
      * Send a {@link #DEBUG} log message and log the exception.
      *
-     * @param tag
-     *            Used to identify the source of a log message. It usually
-     *            identifies the class or activity where the log call occurs.
      * @param msg
      *            The message you would like logged.
      * @param tr
@@ -523,9 +518,6 @@ public class Log {
     /**
      * Send a {@link #INFO} log message and log the exception.
      *
-     * @param tag
-     *            Used to identify the source of a log message. It usually
-     *            identifies the class or activity where the log call occurs.
      * @param msg
      *            The message you would like logged.
      * @param tr
@@ -608,9 +600,6 @@ public class Log {
     /**
      * Send a {@link #WARN} log message and log the exception.
      *
-     * @param tag
-     *            Used to identify the source of a log message. It usually
-     *            identifies the class or activity where the log call occurs.
      * @param msg
      *            The message you would like logged.
      * @param tr
@@ -625,10 +614,6 @@ public class Log {
 
     /**
      * Send a {@link #WARN} log message and log the exception.
-     *
-     * @param tag
-     *            Used to identify the source of a log message. It usually
-     *            identifies the class or activity where the log call occurs.
      *
      * @param tr
      *            An exception to log
@@ -710,9 +695,6 @@ public class Log {
     /**
      * Send a {@link #ERROR} log message and log the exception.
      *
-     * @param tag
-     *            Used to identify the source of a log message. It usually
-     *            identifies the class or activity where the log call occurs.
      * @param msg
      *            The message you would like logged.
      * @param tr
@@ -733,7 +715,7 @@ public class Log {
      * {@link #setDefaultLogLevel(int)}. This means that any level above and
      * including that level will be logged.
      *
-     * Use {@link #configure(Map)} to define different log levels for each tag.
+     * Use {@link #configure(Properties)} to define different log levels for each tag.
      *
      * @param tag
      *            The tag to check.
