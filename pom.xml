@@ -23,6 +23,9 @@
   <packaging>pom</packaging>
 
   <name>Androlog Project</name>
+  <description>Androlog is a customizable Log replacement for Android</description>
+  <url>http://akquinet.github.com/androlog</url>
+  <inceptionYear>2010</inceptionYear>
 
   <modules>
     <module>androlog</module>
@@ -37,6 +40,19 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <organization>
+    <name>akquinet A.G.</name>
+    <url>http://www.akquinet.de/en</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <build>
     <resources>
@@ -90,7 +106,7 @@
 
   <scm>
     <connection>scm:git:git@github.com:akquinet/androlog.git</connection>
-    <url>scm:git:git@github.com:akquinet/androlog.git</url>
+    <url>git@github.com:akquinet/androlog.git</url>
     <developerConnection>scm:git:git@github.com:akquinet/androlog.git</developerConnection>
   </scm>
 
