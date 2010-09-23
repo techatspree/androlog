@@ -737,6 +737,20 @@ public class Log {
     }
 
     /**
+     * Checks to see whether or not a log for the specified object is loggable at
+     * the specified level. The tag is computed from the given object (qualified
+     * class name).
+     * @param object
+     * 				the object.
+     * @param level
+     * 				the level to check.
+     * @return Whether or not that this is allowed to be logged.
+     */
+    public static boolean isLoggable(Object object, int level) {
+        return isLoggable(object.getClass().getName(), level);
+    }
+
+    /**
      * Handy function to get a loggable stack trace from a Throwable
      *
      * @param tr

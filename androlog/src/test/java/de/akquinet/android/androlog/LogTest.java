@@ -43,6 +43,13 @@ public class LogTest {
 
         Log.setDefaultLogLevel(Log.INFO);
         assertFalse(Log.isLoggable(tag, Log.DEBUG));
+
+        // Test with this
+        Log.setDefaultLogLevel(Log.DEBUG);
+        assertTrue(Log.isLoggable(this, Log.DEBUG));
+
+        Log.setDefaultLogLevel(Log.INFO);
+        assertFalse(Log.isLoggable(this, Log.DEBUG));
     }
 
     @Test
@@ -58,6 +65,16 @@ public class LogTest {
 
         Log.activateLogging();
         assertTrue(Log.isLoggable(tag, Log.INFO));
+
+        // Test with this
+        Log.activateLogging();
+        assertTrue(Log.isLoggable(this, Log.INFO));
+
+        Log.deactivateLogging();
+        assertFalse(Log.isLoggable(this, Log.INFO));
+
+        Log.activateLogging();
+        assertTrue(Log.isLoggable(this, Log.INFO));
     }
 
     @Test
@@ -71,6 +88,7 @@ public class LogTest {
         Log.configure(props);
 
         assertTrue(Log.isLoggable("any", Log.INFO));
+        assertTrue(Log.isLoggable(this, Log.INFO));
 
     }
 
@@ -86,6 +104,7 @@ public class LogTest {
         Log.configure(props);
 
         assertFalse(Log.isLoggable("any", Log.INFO));
+        assertFalse(Log.isLoggable(this, Log.INFO));
 
     }
 
@@ -101,6 +120,8 @@ public class LogTest {
         Log.configure(props);
 
         assertFalse(Log.isLoggable("any", Log.INFO));
+        assertFalse(Log.isLoggable(this, Log.INFO));
+
     }
 
     @Test
@@ -115,6 +136,8 @@ public class LogTest {
         Log.configure(props);
 
         assertFalse(Log.isLoggable("any", Log.INFO));
+        assertFalse(Log.isLoggable(this, Log.INFO));
+
     }
 
     @Test
@@ -129,6 +152,8 @@ public class LogTest {
         // Default set to error
         assertFalse(Log.isLoggable("any", Log.INFO));
         assertTrue(Log.isLoggable("any", Log.ERROR));
+        assertFalse(Log.isLoggable(this, Log.INFO));
+        assertTrue(Log.isLoggable(this, Log.ERROR));
 
         // Assert wrong level
         assertFalse(Log.isLoggable("my.log.invalid", Log.INFO));
