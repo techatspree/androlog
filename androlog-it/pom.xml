@@ -18,12 +18,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.akquinet.oss.android</groupId>
+    <groupId>de.akquinet.android</groupId>
     <artifactId>androlog-project</artifactId>
     <version>0.1.7-SNAPSHOT</version>
   </parent>
 
-  <groupId>de.akquinet.oss.android</groupId>
+  <groupId>de.akquinet.android</groupId>
   <artifactId>androlog-it</artifactId>
   <version>0.1.7-SNAPSHOT</version>
 
@@ -32,7 +32,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>de.akquinet.oss.android</groupId>
+      <groupId>de.akquinet.android</groupId>
       <artifactId>androlog</artifactId>
       <version>0.1.7-SNAPSHOT</version>
     </dependency>
@@ -51,11 +51,6 @@
           </sdk>
           <deleteConflictingFiles>true</deleteConflictingFiles>
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
-          <emulator>
-            <avd>android-2</avd>
-            <wait>50000</wait>
-            <options>-no-skin</options>
-          </emulator>
         </configuration>
         <extensions>true</extensions>
       </plugin>
