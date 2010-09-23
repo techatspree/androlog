@@ -19,6 +19,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -35,6 +37,7 @@ import android.os.Environment;
  * to provide programmatic enabling and disabling of logging.
  */
 public class Log {
+
     /**
      * Androlog Prefix. Properties starting with this prefix are not considered
      * as valid tags
@@ -51,7 +54,18 @@ public class Log {
      */
     public static final String ANDROLOG_ACTIVE = "androlog.active";
 
+    /**
+     * Androlog default properties file.
+     */
     public static final String ANDROLOG_PROPERTIES = "androlog.properties";
+
+    /**
+     * Property to deactivate the delagation on the Android Log wtf method
+     * which may cause the process to terminate.
+     * On android 2.2, this property allow to disable this delegation. Androlog
+     * then just log an ASSERT message.
+     */
+    public static final String ANDROLOG_DELEGATE_WTF = "androlog.delegate.wtf";
 
     /**
      * Priority constant for the println method; use Log.v.
@@ -91,6 +105,30 @@ public class Log {
      * Default log level.
      */
     private static int defaultLogLevel = INFO;
+
+    /**
+     * Android Log wtf method.
+     * wtf(String tag, String msg)
+     */
+    private static Method wtfTagMessageMethod;
+
+    /**
+     * Android Log wtf method.
+     * wtf(String tag, Throwable tr)
+     */
+    private static Method wtfTagErrorMethod;
+
+    /**
+     * Android Log wtf method.
+     * wtf(String tag, String msg, Throwable tr)
+     */
+    private static Method wtfTagMessageErrorMethod;
+
+    /**
+     * Sets to true if the wtf method delegates on the Android
+     * Log wtf methods which may cause the process to terminate.
+     */
+    private static boolean useWTF;
 
     /**
      * Map storing the log levels.
@@ -279,6 +317,33 @@ public class Log {
                 logLevels.put(name, log);
             }
         }
+
+        // Check if wtf exists (android 2.2+)
+        // static int	 wtf(String tag, String msg)
+        // static int	 wtf(String tag, Throwable tr)
+        // static int	 wtf(String tag, String msg, Throwable tr)
+        try {
+            wtfTagMessageMethod = android.util.Log.class.getMethod("wtf", new Class[] {String.class, String.class});
+            wtfTagErrorMethod = android.util.Log.class.getMethod("wtf", new Class[] {String.class, Throwable.class});
+            wtfTagMessageErrorMethod = android.util.Log.class.getMethod("wtf", new Class[] {String.class,
+                    String.class, Throwable.class});
+            useWTF = true;
+        } catch (Exception e) {
+            // wtf is not defined, will use ASSERT level.
+            useWTF = false;
+        }
+
+        if (useWTF) {
+            // Check if androlog configuration does not override this.
+            if (configuration.containsKey(ANDROLOG_DELEGATE_WTF)) {
+                String v = configuration.getProperty(ANDROLOG_DELEGATE_WTF);
+                // If androlog.delegate.wtf is set to true, we really call Log.wtf which
+                // may terminate the process.
+                useWTF = "true".equals(v.toLowerCase());
+                // In other cases, androlog does log a message in the ASSERT level.
+            }
+        }
+
     }
 
     /**
@@ -707,6 +772,65 @@ public class Log {
         return 0;
     }
 
+    public static int wtf(String tag, String msg) {
+        if (isLoggable(tag, ASSERT)) {
+            if (useWTF) {
+                try {
+                    return (Integer) wtfTagMessageMethod.invoke(null, new Object[] {tag, msg});
+                } catch (Exception e) {
+                    return println(ASSERT, tag, msg);
+                }
+            } else {
+                return println(ASSERT, tag, msg);
+            }
+        }
+        return 0;
+    }
+
+    public static int wtf(String tag, Throwable tr) {
+        if (isLoggable(tag, ASSERT)) {
+            if (useWTF) {
+                try {
+                    return (Integer) wtfTagErrorMethod.invoke(null, new Object[] {tag, tr});
+                } catch (Exception e) {
+                    return println(ASSERT, tag, getStackTraceString(tr));
+                }
+            } else {
+                return println(ASSERT, tag, getStackTraceString(tr));
+            }
+        }
+        return 0;
+    }
+
+    public static int wtf(String tag, String msg, Throwable tr) {
+        if (isLoggable(tag, ASSERT)) {
+            if (useWTF) {
+                try {
+                    return (Integer) wtfTagMessageErrorMethod.invoke(null, new Object[] {tag, msg, tr});
+                } catch (Exception e) {
+                    return println(ASSERT, tag, msg + '\n' + getStackTraceString(tr));
+                }
+            } else {
+                return println(ASSERT, tag, msg + '\n' + getStackTraceString(tr));
+            }
+        }
+        return 0;
+    }
+
+    public static int wtf(Object object, String msg, Throwable tr) {
+        if (object != null) {
+            return wtf(object.getClass().getName(), msg, tr);
+        }
+        return 0;
+    }
+
+    public static int wtf(Object object, String msg) {
+        if (object != null) {
+            return wtf(object.getClass().getName(), msg);
+        }
+        return 0;
+    }
+
     /**
      * Checks to see whether or not a log for the specified tag is loggable at
      * the specified level.
@@ -726,7 +850,7 @@ public class Log {
      *             is thrown if the tag.length() > 23.
      */
     public static boolean isLoggable(String tag, int level) {
-        if (!activated) {
+        if (!activated  && level != ASSERT) {
             return false;
         }
         Integer logLevel = logLevels.get(tag);
