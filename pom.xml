@@ -115,7 +115,6 @@
         <artifactId>maven-release-plugin</artifactId>
         <version>2.0-beta-9</version>
         <configuration>
-          <tagBase>https://www.spree.de/svn-repository/go-mobile/android/android-utils/tags</tagBase>
           <useReleaseProfile>true</useReleaseProfile>
           <goals>deploy</goals>
         </configuration>
@@ -149,7 +148,27 @@
           <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
       </distributionManagement>
+    </profile>
 
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
