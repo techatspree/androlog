@@ -194,4 +194,15 @@ public class LogTest {
         assertTrue(Log.isLoggable("my.log.assert2", Log.ASSERT));
     }
 
+    @Test
+    public void testIsAssertLoggable() {
+        assertTrue(Log.isLoggable("any", Log.ASSERT));
+        Log.deactivateLogging();
+        assertTrue(Log.isLoggable("any", Log.ASSERT));
+        assertTrue(Log.isLoggable(this, Log.ASSERT));
+        Log.activateLogging();
+        assertTrue(Log.isLoggable("any", Log.ASSERT));
+        assertTrue(Log.isLoggable(this, Log.ASSERT));
+    }
+
 }

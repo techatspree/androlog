@@ -19,7 +19,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -157,11 +156,30 @@ public class Log {
     }
 
     /**
+     * Enables or disables the delegation to the Android log
+     * wtf methods. Those methods when present (android 2.2+)
+     * may cause the termination of the application.
+     * @param delegation enables or disables the delegation
+     * @return if the delegation is enabled. Indeed, on 1.6 and
+     * 2.0 it can't be enabled.
+     */
+    public static boolean setWTFDelegation(boolean delegation) {
+        // We can't enable the wtf delegation if we're on 1.6 or 2.0
+        if (wtfTagErrorMethod == null) {
+            useWTF = false;
+        } else {
+            useWTF = delegation;
+        }
+        return useWTF;
+    }
+
+    /**
      * Resets the configuration.
      */
     public static void reset() {
         deactivateLogging();
         defaultLogLevel = INFO;
+        detectWTFMethods();
         logLevels.clear();
     }
 
@@ -297,6 +315,8 @@ public class Log {
         boolean activate = "true".equalsIgnoreCase(""
                 + configuration.get(ANDROLOG_ACTIVE));
 
+        detectWTFMethods();
+
         if (activate) {
             activateLogging();
         }
@@ -318,6 +338,21 @@ public class Log {
             }
         }
 
+
+        if (useWTF) {
+            // Check if androlog configuration does not override this.
+            if (configuration.containsKey(ANDROLOG_DELEGATE_WTF)) {
+                String v = configuration.getProperty(ANDROLOG_DELEGATE_WTF);
+                // If androlog.delegate.wtf is set to true, we really call Log.wtf which
+                // may terminate the process.
+                useWTF = "true".equals(v.toLowerCase());
+                // In other cases, androlog does log a message in the ASSERT level.
+            }
+        }
+
+    }
+
+    private static void detectWTFMethods() {
         // Check if wtf exists (android 2.2+)
         // static int	 wtf(String tag, String msg)
         // static int	 wtf(String tag, Throwable tr)
@@ -332,18 +367,6 @@ public class Log {
             // wtf is not defined, will use ASSERT level.
             useWTF = false;
         }
-
-        if (useWTF) {
-            // Check if androlog configuration does not override this.
-            if (configuration.containsKey(ANDROLOG_DELEGATE_WTF)) {
-                String v = configuration.getProperty(ANDROLOG_DELEGATE_WTF);
-                // If androlog.delegate.wtf is set to true, we really call Log.wtf which
-                // may terminate the process.
-                useWTF = "true".equals(v.toLowerCase());
-                // In other cases, androlog does log a message in the ASSERT level.
-            }
-        }
-
     }
 
     /**
@@ -776,7 +799,8 @@ public class Log {
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
                 try {
-                    return (Integer) wtfTagMessageMethod.invoke(null, new Object[] {tag, msg});
+                    return  (Integer)
+                        wtfTagMessageMethod.invoke(null, new Object[] {tag, msg});
                 } catch (Exception e) {
                     return println(ASSERT, tag, msg);
                 }
