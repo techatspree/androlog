@@ -34,7 +34,6 @@ public class WTFTest extends TestCase {
     }
 
     public void testWTFWhenLogActive() {
-        Assert.assertTrue(Log.setWTFDelegation(true));
         String tag = "de.akquinet.gomobile.androlog.test.WTFTest";
         String message = "This is a REALLY BAD error";
         int x = Log.wtf(tag, message);
