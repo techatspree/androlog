@@ -34,6 +34,14 @@ import android.os.Environment;
  * Implements a small layer on top of the
  * <a href="http://developer.android.com/reference/android/util/Log.html">Android Log</a>
  * to provide programmatic enabling and disabling of logging.
+ * <p>
+ * To support <code>wtf</code> methods, Androlog detects if we're on Android 2.2+. If not,
+ * the ASSERT level is used.
+ * </p>
+ * <p>
+ * Log methods returns an integer. This integer is the number of byte written in the log.
+ * If a method returns 0, the message was not logged.
+ * </p>
  */
 public class Log {
 
@@ -352,6 +360,12 @@ public class Log {
 
     }
 
+    /**
+     * Check if the android Log class contains the <code>wtf</code>
+     * method (Android 2.2+). In that case, the delegation to those
+     * method is enabled. If not, calling {@link Log#wtf(Object, String)}
+     * log a message with the level {@link Log#ASSERT}
+     */
     private static void detectWTFMethods() {
         // Check if wtf exists (android 2.2+)
         // static int	 wtf(String tag, String msg)
@@ -795,6 +809,20 @@ public class Log {
         return 0;
     }
 
+    /**
+     * What a Terrible Failure: Report a condition that should never happen.
+     * The error will always be logged at level ASSERT despite the logging is disabled.
+     * Depending on system configuration, and on Android 2.2+, a report may be added to
+     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     *
+     * On older Android version (before 2.2), the message is logged with the Assert level. Those
+     * log messages will always be logged.
+     * @param tag
+     *            Used to identify the source of a log message. It usually
+     *            identifies the class or activity where the log call occurs.
+     * @param msg
+     *            The message you would like logged.
+     */
     public static int wtf(String tag, String msg) {
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
@@ -811,6 +839,20 @@ public class Log {
         return 0;
     }
 
+    /**
+     * What a Terrible Failure: Report a condition that should never happen.
+     * The error will always be logged at level ASSERT despite the logging is disabled.
+     * Depending on system configuration, and on Android 2.2+, a report may be added to
+     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     *
+     * On older Android version (before 2.2), the message is logged with the Assert level. Those
+     * log messages will always be logged.
+     * @param tag
+     *            Used to identify the source of a log message. It usually
+     *            identifies the class or activity where the log call occurs.
+     * @param tr
+     *            The exception to log
+     */
     public static int wtf(String tag, Throwable tr) {
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
@@ -826,6 +868,22 @@ public class Log {
         return 0;
     }
 
+    /**
+     * What a Terrible Failure: Report a condition that should never happen.
+     * The error will always be logged at level ASSERT despite the logging is disabled.
+     * Depending on system configuration, and on Android 2.2+, a report may be added to
+     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     *
+     * On older Android version (before 2.2), the message is logged with the Assert level. Those
+     * log messages will always be logged.
+     * @param tag
+     *            Used to identify the source of a log message. It usually
+     *            identifies the class or activity where the log call occurs.
+     * @param msg
+     *            The message you would like logged.
+     * @param tr
+     *            The exception to log
+     */
     public static int wtf(String tag, String msg, Throwable tr) {
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
@@ -841,6 +899,21 @@ public class Log {
         return 0;
     }
 
+    /**
+     * What a Terrible Failure: Report a condition that should never happen.
+     * The error will always be logged at level ASSERT despite the logging is disabled.
+     * Depending on system configuration, and on Android 2.2+, a report may be added to
+     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     *
+     * On older Android version (before 2.2), the message is logged with the Assert level. Those
+     * log messages will always be logged.
+     * @param object
+     *            Used to compute the tag.
+     * @param msg
+     *            The message you would like logged.
+     * @param tr
+     *            The exception to log
+     */
     public static int wtf(Object object, String msg, Throwable tr) {
         if (object != null) {
             return wtf(object.getClass().getName(), msg, tr);
@@ -848,6 +921,19 @@ public class Log {
         return 0;
     }
 
+    /**
+     * What a Terrible Failure: Report a condition that should never happen.
+     * The error will always be logged at level ASSERT despite the logging is disabled.
+     * Depending on system configuration, and on Android 2.2+, a report may be added to
+     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     *
+     * On older Android version (before 2.2), the message is logged with the Assert level. Those
+     * log messages will always be logged.
+     * @param object
+     *            Used to compute the tag.
+     * @param msg
+     *            The message you would like logged.
+     */
     public static int wtf(Object object, String msg) {
         if (object != null) {
             return wtf(object.getClass().getName(), msg);
