@@ -193,7 +193,7 @@ public class Log {
     }
 
     /**
-     * Android init method. This method uses the Android API. Inits the logger
+     * Androlog init method. This method uses the Android API. Inits the logger
      * by reading the file: <code>/SDCARD/fileName</code>. The file must be a
      * valid Java properties file.
      *
@@ -204,11 +204,55 @@ public class Log {
         init(null, fileName);
     }
 
+    /**
+     * Androlog init method. This method uses the Android API. This methods
+     * computes the package ({@link Context#getPackageName()}) of the
+     * application configuring the logger, and initializes the logger with a
+     * property file named 'package.properties' on the SDCARD or in the application
+     * assets (if the file cannot be found on the SDCard). If the file is readable
+     * and exist, the Log is configured. The file must be a valid Java properties file.
+     *
+     * @see Properties
+     */
+    public static void init(Context context) {
+        init(context, null);
+    }
+
+    /**
+     * Androlog init method. This method uses the Android API. It reads the
+     * {@link Log#ANDROLOG_PROPERTIES} file on the SDCARD. If the file is
+     * readable and exist, the Log is configured. The file must be a valid Java
+     * properties file.
+     *
+     * @see Properties
+     */
+    public static void init() {
+        init(null, ANDROLOG_PROPERTIES);
+    }
+
+    /**
+     * Androlog Init Method. This method loads the Androlog Configuration from:
+     * <ol>
+     * <li><code>/SDCARD/fileName</code> if the file name if not <code>null</code></li>
+     * <li><code>/SDCARD/Application_Package.properties</code> if
+     * the file name is <code>null</code> and context is not <code>null</code></li>
+     * <li><code>Application_Assets/fileName</code> if the file name if not <code>null</code>
+     * and the context is not <code>null</code></li>
+     * <li><code>Application_Assets/Application_Package.properties</code> if the file name is
+     * <code>null</code> and the context is not <code>null</code></li>
+     * </ol>
+     * The first found file is used, allowing overriding the configuration by just pushing a file
+     * on the SDCard.
+     * Passing <code>null</code> to both parameters is equivalent to the case 2. If the lookup
+     * failed, the logging is disabled.
+     * @param context the application context
+     * @param fileName the file name
+     */
     public static void init(Context context, String fileName) {
         reset();
 
         String file = fileName;
-        if (file == null) {
+        if (file == null  && context != null) {
             file = context.getPackageName() + ".properties";
         }
 
@@ -239,32 +283,6 @@ public class Log {
     }
 
     /**
-	 * Android init method. This method uses the Android API. This methods
-	 * computes the package ({@link Context#getPackageName()}) of the
-	 * application configuring the logger, and initializes the logger with a
-	 * property file named 'package.properties' on the SDCARD. If the file is
-	 * readable and exist, the Log is configured. The file must be a valid Java
-	 * properties file.
-	 *
-	 * @see Properties
-	 */
-	public static void init(Context context) {
-	    init(context, null);
-	}
-
-	/**
-	 * Android init method. This method uses the Android API. It reads the
-	 * {@link Log#ANDROLOG_PROPERTIES} file on the SDCARD. If the file is
-	 * readable and exist, the Log is configured. The file must be a valid Java
-	 * properties file.
-	 *
-	 * @see Properties
-	 */
-	public static void init() {
-	    init(null, ANDROLOG_PROPERTIES);
-	}
-
-	/**
      * Gets an input on a configuration file
      * placed on the the SDCard.
      * @param fileName the file name
