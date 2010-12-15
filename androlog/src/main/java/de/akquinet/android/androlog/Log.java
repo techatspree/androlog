@@ -109,10 +109,17 @@ public class Log {
      * Global activation flag.
      */
     private static boolean activated = true;
+
     /**
      * Default log level.
      */
     private static int defaultLogLevel = INFO;
+
+    /**
+     * Default report level.
+     */
+    private static int defaultReportLevel = INFO;
+
 
     /**
      * Android Log wtf method.
@@ -139,6 +146,17 @@ public class Log {
     private static boolean useWTF;
 
     /**
+     * The list of log entries
+     */
+    private static List<String> entries;
+
+    private static boolean enableLogEntryCollection;
+
+    private static int maxOfEntriesInReports;
+
+    private static boolean reportingActivated;
+
+    /**
      * Map storing the log levels.
      */
     private static final Map<String, Integer> logLevels = new HashMap<String, Integer>();
@@ -162,6 +180,20 @@ public class Log {
      */
     public static void deactivateLogging() {
         activated = false;
+    }
+
+    /**
+     * Activates the reporting.
+     */
+    public static void activateReporting() {
+        reportingActivated = true;
+    }
+
+    /**
+     * Deactivating the reporting.
+     */
+    public static void deactivateReporting() {
+        reportingActivated = false;
     }
 
     /**
@@ -383,12 +415,31 @@ public class Log {
     }
 
     /**
+     * Sets the default report level.
+     *
+     * @param logLevel
+     *            the report level
+     */
+    public static void setDefaultReportLevel(int logLevel) {
+        defaultReportLevel = logLevel;
+    }
+
+    /**
      * Gets the default log level.
      *
      * @return the log level
      */
     public static int getDefaultLogLevel() {
         return defaultLogLevel;
+    }
+
+    /**
+     * Gets the default report level.
+
+     * @return the log level
+     */
+    public static int getDefaultReportLevel() {
+        return defaultReportLevel;
     }
 
     /**
@@ -399,18 +450,28 @@ public class Log {
      */
     public static void configure(Properties configuration) {
 
-        boolean activate = "true".equalsIgnoreCase(""
-                + configuration.get(ANDROLOG_ACTIVE));
-
-        detectWTFMethods();
-
+        boolean activate = "true".equalsIgnoreCase(
+                configuration.getProperty(ANDROLOG_ACTIVE));
         if (activate) {
             activateLogging();
         }
 
+        boolean activate4Report = "true".equalsIgnoreCase(
+                configuration.getProperty("androlog.report.active"));
+        if (activate4Report) {
+            activateReporting();
+        }
+
+        detectWTFMethods();
+
         if (configuration.containsKey(ANDROLOG_DEFAULT_LEVEL)) {
             String level = configuration.getProperty(ANDROLOG_DEFAULT_LEVEL);
             defaultLogLevel = getLevel(level);
+        }
+
+        if (configuration.containsKey("androlog.report.default.level")) {
+            String level = configuration.getProperty("androlog.report.default.level");
+            defaultReportLevel = getLevel(level);
         }
 
         @SuppressWarnings("unchecked")
@@ -435,6 +496,26 @@ public class Log {
                 useWTF = "true".equals(v.toLowerCase());
                 // In other cases, androlog does log a message in the ASSERT level.
             }
+        }
+
+        // Do we need to store the log entries for Reports ?
+        enableLogEntryCollection = false;
+        if (configuration.containsKey("androlog.report.senders")) {
+            // We enable the collection only if we have senders
+            String s = configuration.getProperty("androlog.report.senders");
+            String[] senders = s.split(",");
+            //TODO Create the senders.
+            enableLogEntryCollection = true;
+        }
+
+        if (enableLogEntryCollection) {
+            if (configuration.containsKey("androlog.report.log.items")) {
+                String p = configuration.getProperty("androlog.report.log.items");
+                maxOfEntriesInReports = Integer.parseInt(p);
+            } else {
+                maxOfEntriesInReports = 25; // Default
+            }
+            entries = new ArrayList<String>(maxOfEntriesInReports);
         }
 
     }
@@ -472,6 +553,9 @@ public class Log {
      *            The message you would like logged.
      */
     public static int v(String tag, String msg) {
+        if (isReportable(VERBOSE)) {
+            addEntry(print(VERBOSE, tag, msg, null));
+        }
         if (isLoggable(tag, VERBOSE)) {
             return android.util.Log.v(tag, msg);
         }
@@ -490,6 +574,9 @@ public class Log {
      *            An exception to log
      */
     public static int v(String tag, String msg, Throwable tr) {
+        if (isReportable(VERBOSE)) {
+            addEntry(print(VERBOSE, tag, msg, tr));
+        }
         if (isLoggable(tag, VERBOSE)) {
             return android.util.Log.v(tag, msg, tr);
         }
@@ -555,6 +642,9 @@ public class Log {
      *            The message you would like logged.
      */
     public static int d(String tag, String msg) {
+        if (isReportable(DEBUG)) {
+            addEntry(print(DEBUG, tag, msg, null));
+        }
         if (isLoggable(tag, DEBUG)) {
             return android.util.Log.d(tag, msg);
         }
@@ -573,6 +663,9 @@ public class Log {
      *            An exception to log
      */
     public static int d(String tag, String msg, Throwable tr) {
+        if (isReportable(DEBUG)) {
+            addEntry(print(DEBUG, tag, msg, tr));
+        }
         if (isLoggable(tag, DEBUG)) {
             return android.util.Log.d(tag, msg, tr);
         }
@@ -638,6 +731,9 @@ public class Log {
      *            The message you would like logged.
      */
     public static int i(String tag, String msg) {
+        if (isReportable(INFO)) {
+            addEntry(print(INFO, tag, msg, null));
+        }
         if (isLoggable(tag, INFO)) {
             return android.util.Log.i(tag, msg);
         }
@@ -656,6 +752,9 @@ public class Log {
      *            An exception to log
      */
     public static int i(String tag, String msg, Throwable tr) {
+        if (isReportable(INFO)) {
+            addEntry(print(INFO, tag, msg, tr));
+        }
         if (isLoggable(tag, INFO)) {
             return android.util.Log.i(tag, msg, tr);
         }
@@ -721,6 +820,9 @@ public class Log {
      *            The message you would like logged.
      */
     public static int w(String tag, String msg) {
+        if (isReportable(WARN)) {
+            addEntry(print(WARN, tag, msg, null));
+        }
         if (isLoggable(tag, WARN)) {
             return android.util.Log.w(tag, msg);
         }
@@ -739,6 +841,9 @@ public class Log {
      *            An exception to log
      */
     public static int w(String tag, String msg, Throwable tr) {
+        if (isReportable(WARN)) {
+             addEntry(print(WARN, tag, msg, tr));
+        }
         if (isLoggable(tag, WARN)) {
             return android.util.Log.w(tag, msg, tr);
         }
@@ -800,6 +905,9 @@ public class Log {
      *            An exception to log
      */
     public static int w(String tag, Throwable tr) {
+        if (isReportable(WARN)) {
+            addEntry(print(WARN, tag, "", null));
+        }
         if (isLoggable(tag, WARN)) {
             return android.util.Log.w(tag, tr);
         }
@@ -816,6 +924,9 @@ public class Log {
      *            The message you would like logged.
      */
     public static int e(String tag, String msg) {
+        if (isReportable(ERROR)) {
+            addEntry(print(ERROR, tag, msg, null));
+        }
         if (isLoggable(tag, ERROR)) {
             return android.util.Log.e(tag, msg);
         }
@@ -834,6 +945,9 @@ public class Log {
      *            An exception to log
      */
     public static int e(String tag, String msg, Throwable tr) {
+        if (isReportable(ERROR)) {
+            addEntry(print(ERROR, tag, msg, tr));
+        }
         if (isLoggable(tag, ERROR)) {
             return android.util.Log.e(tag, msg, tr);
         }
@@ -903,6 +1017,9 @@ public class Log {
      *            The message you would like logged.
      */
     public static int wtf(String tag, String msg) {
+        if (isReportable(ASSERT)) {
+            addEntry(print(ASSERT, tag, msg, null));
+        }
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
                 try {
@@ -933,6 +1050,9 @@ public class Log {
      *            The exception to log
      */
     public static int wtf(String tag, Throwable tr) {
+        if (isReportable(ASSERT)) {
+            addEntry(print(ASSERT, tag, "", null));
+        }
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
                 try {
@@ -964,6 +1084,9 @@ public class Log {
      *            The exception to log
      */
     public static int wtf(String tag, String msg, Throwable tr) {
+        if (isReportable(ASSERT)) {
+            addEntry(print(ASSERT, tag, msg, tr));
+        }
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
                 try {
@@ -1050,6 +1173,24 @@ public class Log {
     }
 
     /**
+     * Checks to see whether or not a log is reportable at
+     * the specified level.
+     *
+     * The default level of any tag is set as specified in
+     * {@link #setDefaultReportLevel(int)}. This means that any level above and
+     * including that level will be logged.
+     *
+     * @param level
+     *            The level to check.
+     * @return Whether or not that this is allowed to be reported.
+     */
+    public static boolean isReportable(int level) {
+        return reportingActivated
+            && enableLogEntryCollection
+            && level >= defaultReportLevel;
+    }
+
+    /**
      * Checks to see whether or not a log for the specified object is loggable at
      * the specified level. The tag is computed from the given object (qualified
      * class name).
@@ -1087,6 +1228,49 @@ public class Log {
      */
     public static int println(int priority, String tag, String msg) {
         return android.util.Log.println(priority, tag, msg);
+    }
+
+    /**
+     * Gets a String form of the log data.
+     *
+     * @param priority
+     *            The priority/type of this log message
+     * @param tag
+     *            Used to identify the source of a log message. It usually
+     *            identifies the class or activity where the log call occurs.
+     * @param msg
+     *            The message you would like logged.
+     * @param tr
+     * 			  The error, can be <code>null</code>
+     * @return The String form.
+     */
+    public static String print(int priority, String tag, String msg, Throwable tr) {
+        // Compute the letter for the given priority
+        String p = "X"; // X => Unknown
+        switch(priority) {
+            case DEBUG: p = "D"; break;
+            case INFO: p = "I"; break;
+            case WARN: p = "W"; break;
+            case ERROR: p = "E"; break;
+            case ASSERT: p = "F"; break;
+        }
+        if (tr == null) {
+            return p + "/" + tag + ": " + msg;
+        } else {
+            return p + "/" + tag + ": " + msg + "\n" + getStackTraceString(tr);
+        }
+    }
+
+    private static void addEntry(String entry) {
+        if (maxOfEntriesInReports > 0
+                && entries.size() == maxOfEntriesInReports) {
+            entries.remove(0); // Remove the first element.
+        }
+        entries.add(entry);
+    }
+
+    public static List<String> getReportedEntries() {
+        return new ArrayList<String>(entries);
     }
 
     private static void closeQuietly(InputStream is) {
