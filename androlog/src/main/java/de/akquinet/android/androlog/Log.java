@@ -227,9 +227,14 @@ public class Log {
      */
     public static void reset() {
         deactivateLogging();
+        deactivateReporting();
         defaultLogLevel = INFO;
+        defaultReportLevel = INFO;
         detectWTFMethods();
         logLevels.clear();
+        maxOfEntriesInReports = 25;
+        enableLogEntryCollection = false;
+        entries = null;
     }
 
     /**
@@ -1278,7 +1283,11 @@ public class Log {
     }
 
     public static List<String> getReportedEntries() {
-        return new ArrayList<String>(entries);
+        if (entries != null) {
+            return new ArrayList<String>(entries);
+        } else {
+            return null;
+        }
     }
 
     private static void closeQuietly(InputStream is) {
