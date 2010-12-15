@@ -11,5 +11,4 @@
     <instrumentation android:targetPackage="de.akquinet.gomobile.androlog.test" android:name="android.test.InstrumentationTestRunner" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 
-
 </manifest>
