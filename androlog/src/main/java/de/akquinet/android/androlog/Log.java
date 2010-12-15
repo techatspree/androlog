@@ -46,6 +46,14 @@ import android.os.Environment;
  */
 public class Log {
 
+    public static final String ANDROLOG_REPORT_LOG_ITEMS = "androlog.report.log.items";
+
+    public static final String ANDROLOG_REPORT_SENDERS = "androlog.report.senders";
+
+    public static final String ANDROLOG_REPORT_DEFAULT_LEVEL = "androlog.report.default.level";
+
+    public static final String ANDROLOG_REPORT_ACTIVE = "androlog.report.active";
+
     /**
      * Androlog Prefix. Properties starting with this prefix are not considered
      * as valid tags
@@ -457,7 +465,7 @@ public class Log {
         }
 
         boolean activate4Report = "true".equalsIgnoreCase(
-                configuration.getProperty("androlog.report.active"));
+                configuration.getProperty(ANDROLOG_REPORT_ACTIVE));
         if (activate4Report) {
             activateReporting();
         }
@@ -469,8 +477,8 @@ public class Log {
             defaultLogLevel = getLevel(level);
         }
 
-        if (configuration.containsKey("androlog.report.default.level")) {
-            String level = configuration.getProperty("androlog.report.default.level");
+        if (configuration.containsKey(ANDROLOG_REPORT_DEFAULT_LEVEL)) {
+            String level = configuration.getProperty(ANDROLOG_REPORT_DEFAULT_LEVEL);
             defaultReportLevel = getLevel(level);
         }
 
@@ -500,17 +508,17 @@ public class Log {
 
         // Do we need to store the log entries for Reports ?
         enableLogEntryCollection = false;
-        if (configuration.containsKey("androlog.report.senders")) {
+        if (configuration.containsKey(ANDROLOG_REPORT_SENDERS)) {
             // We enable the collection only if we have senders
-            String s = configuration.getProperty("androlog.report.senders");
+            String s = configuration.getProperty(ANDROLOG_REPORT_SENDERS);
             String[] senders = s.split(",");
             //TODO Create the senders.
             enableLogEntryCollection = true;
         }
 
         if (enableLogEntryCollection) {
-            if (configuration.containsKey("androlog.report.log.items")) {
-                String p = configuration.getProperty("androlog.report.log.items");
+            if (configuration.containsKey(ANDROLOG_REPORT_LOG_ITEMS)) {
+                String p = configuration.getProperty(ANDROLOG_REPORT_LOG_ITEMS);
                 maxOfEntriesInReports = Integer.parseInt(p);
             } else {
                 maxOfEntriesInReports = 25; // Default
