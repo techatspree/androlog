@@ -298,6 +298,19 @@ public class AndrologInitTest extends AndroidTestCase {
         Assert.assertEquals(expected, x);
     }
 
+    public void testInitWithContextAndAssetsAndFileName() {
+        Log.init(getContext(), "androlog/my-configuration.properties");
+        String message = "This is a INFO test";
+        String tag = "my.log.info";
+        int expected = tag.length() + message.length() + 3;
+        int x = Log.d(tag, message);
+        Assert.assertEquals(0, x);
+        x = Log.i(tag, message);
+        Assert.assertEquals(expected, x);
+        x = Log.w(tag, message);
+        Assert.assertEquals(expected, x);
+    }
+
     public void testInitWithMissingContext() {
         testContext.delete();
         // We create a mock context without asset.
@@ -315,6 +328,20 @@ public class AndrologInitTest extends AndroidTestCase {
                 return null;
             }
         });
+        String message = "This is a INFO test";
+        String tag = "my.log.info";
+        int x = Log.d(tag, message);
+        Assert.assertEquals(0, x);
+        x = Log.i(tag, message);
+        Assert.assertEquals(0, x);
+        x = Log.w(tag, message);
+        Assert.assertEquals(0, x);
+    }
+
+    public void testInitWithNullAndNull() {
+        testContext.delete();
+        defaultFile.delete();
+        Log.init(null, null);
         String message = "This is a INFO test";
         String tag = "my.log.info";
         int x = Log.d(tag, message);
