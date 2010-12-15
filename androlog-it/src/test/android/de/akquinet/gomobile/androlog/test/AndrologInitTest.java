@@ -19,8 +19,10 @@ import java.io.FileOutputStream;
 import java.util.Properties;
 
 import junit.framework.Assert;
+import android.content.res.AssetManager;
 import android.os.Environment;
 import android.test.AndroidTestCase;
+import android.test.mock.MockContext;
 import de.akquinet.android.androlog.Log;
 
 public class AndrologInitTest extends AndroidTestCase {
@@ -283,9 +285,36 @@ public class AndrologInitTest extends AndroidTestCase {
         Assert.assertEquals(expected, x);
     }
 
+    public void testInitWithContextAndAssets() {
+        Log.init(getContext());
+        String message = "This is a INFO test";
+        String tag = "my.log.info";
+        int expected = tag.length() + message.length() + 3;
+        int x = Log.d(tag, message);
+        Assert.assertEquals(0, x);
+        x = Log.i(tag, message);
+        Assert.assertEquals(expected, x);
+        x = Log.w(tag, message);
+        Assert.assertEquals(expected, x);
+    }
+
     public void testInitWithMissingContext() {
         testContext.delete();
-        Log.init(getContext());
+        // We create a mock context without asset.
+        // As AssetManager cannot be overridden,
+        // we just return null as AssetManager.
+        Log.init(new MockContext() {
+
+            @Override
+            public String getPackageName() {
+                return getContext().getPackageName();
+            }
+
+            @Override
+            public AssetManager getAssets() {
+                return null;
+            }
+        });
         String message = "This is a INFO test";
         String tag = "my.log.info";
         int x = Log.d(tag, message);
