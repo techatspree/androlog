@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.Environment;
 
 /**
@@ -192,7 +193,7 @@ public class Log {
     }
 
     /**
-     * Android init method. This method uses the Android API. Inits the logger
+     * Androlog init method. This method uses the Android API. Inits the logger
      * by reading the file: <code>/SDCARD/fileName</code>. The file must be a
      * valid Java properties file.
      *
@@ -200,57 +201,25 @@ public class Log {
      *            the file name
      */
     public static void init(String fileName) {
-        reset();
-
-        File sdcard = Environment.getExternalStorageDirectory();
-        if (sdcard == null || !sdcard.exists() || !sdcard.canRead()) {
-            return;
-        }
-
-        String sdCardPath = sdcard.getAbsolutePath();
-
-        File propFile = new File(sdCardPath + "/" + fileName);
-        if (!propFile.exists()) {
-            return;
-        }
-
-        Properties configuration = new Properties();
-        FileInputStream fileIs;
-        try {
-            fileIs = new FileInputStream(propFile);
-        } catch (FileNotFoundException e) {
-            // should not happen, we check that above
-            return;
-        }
-        try {
-            // There is no load(Reader) method on Android,
-            // so we have to use InputStream
-            configuration.load(fileIs);
-            // Then call configure.
-            configure(configuration);
-        } catch (IOException e) {
-            return;
-        } finally {
-            closeQuietly(fileIs);
-        }
+        init(null, fileName);
     }
 
     /**
-     * Android init method. This method uses the Android API. This methods
+     * Androlog init method. This method uses the Android API. This methods
      * computes the package ({@link Context#getPackageName()}) of the
      * application configuring the logger, and initializes the logger with a
-     * property file named 'package.properties' on the SDCARD. If the file is
-     * readable and exist, the Log is configured. The file must be a valid Java
-     * properties file.
+     * property file named 'package.properties' on the SDCARD or in the application
+     * assets (if the file cannot be found on the SDCard). If the file is readable
+     * and exist, the Log is configured. The file must be a valid Java properties file.
      *
      * @see Properties
      */
     public static void init(Context context) {
-        init(context.getPackageName() + ".properties");
+        init(context, null);
     }
 
     /**
-     * Android init method. This method uses the Android API. It reads the
+     * Androlog init method. This method uses the Android API. It reads the
      * {@link Log#ANDROLOG_PROPERTIES} file on the SDCARD. If the file is
      * readable and exist, the Log is configured. The file must be a valid Java
      * properties file.
@@ -258,8 +227,118 @@ public class Log {
      * @see Properties
      */
     public static void init() {
-        init(ANDROLOG_PROPERTIES);
+        init(null, ANDROLOG_PROPERTIES);
     }
+
+    /**
+     * Androlog Init Method. This method loads the Androlog Configuration from:
+     * <ol>
+     * <li><code>/SDCARD/fileName</code> if the file name if not <code>null</code></li>
+     * <li><code>/SDCARD/Application_Package.properties</code> if
+     * the file name is <code>null</code> and context is not <code>null</code></li>
+     * <li><code>Application_Assets/fileName</code> if the file name if not <code>null</code>
+     * and the context is not <code>null</code></li>
+     * <li><code>Application_Assets/Application_Package.properties</code> if the file name is
+     * <code>null</code> and the context is not <code>null</code></li>
+     * </ol>
+     * The first found file is used, allowing overriding the configuration by just pushing a file
+     * on the SDCard.
+     * Passing <code>null</code> to both parameters is equivalent to the case 2. If the lookup
+     * failed, the logging is disabled.
+     * @param context the application context
+     * @param fileName the file name
+     */
+    public static void init(Context context, String fileName) {
+        reset();
+
+        String file = fileName;
+        if (file == null  && context != null) {
+            file = context.getPackageName() + ".properties";
+        }
+
+        // Check from SDCard
+        InputStream fileIs = getConfigurationFileFromSDCard(file);
+        if (fileIs == null) {
+            // Check from Assets
+            fileIs = getConfigurationFileFromAssets(context, file);
+        }
+
+        if (fileIs != null) {
+            Properties configuration = new Properties();
+
+            try {
+                // There is no load(Reader) method on Android,
+                // so we have to use InputStream
+                configuration.load(fileIs);
+                // Then call configure.
+                configure(configuration);
+            } catch (IOException e) {
+                return;
+            } finally {
+                closeQuietly(fileIs);
+            }
+        }
+
+
+    }
+
+    /**
+     * Gets an input on a configuration file
+     * placed on the the SDCard.
+     * @param fileName the file name
+     * @return the input stream to read the file or <code>null</code>
+     * if the file does not exist.
+     */
+    private static InputStream getConfigurationFileFromSDCard(String fileName) {
+        File sdcard = Environment.getExternalStorageDirectory();
+        if (sdcard == null || !sdcard.exists() || !sdcard.canRead()) {
+            return null;
+        }
+
+        String sdCardPath = sdcard.getAbsolutePath();
+
+        File propFile = new File(sdCardPath + "/" + fileName);
+        if (!propFile.exists()) {
+            return null;
+        }
+
+        FileInputStream fileIs = null;
+        try {
+            fileIs = new FileInputStream(propFile);
+        } catch (FileNotFoundException e) {
+            // should not happen, we check that above
+            return null;
+        }
+
+        return fileIs;
+    }
+
+    /**
+     * Gets an input on a configuration file
+     * placed in the application assets.
+     * @param context the Android context to use
+     * @param fileName the file name
+     * @return the input stream to read the file or <code>null</code>
+     * if the file does not exist.
+     */
+    private static InputStream getConfigurationFileFromAssets(Context context, String fileName) {
+        if (context == null) {
+            return null;
+        }
+
+        AssetManager assets = context.getAssets();
+        if (assets == null) {
+            return null;
+        }
+
+        try {
+            return assets.open(fileName);
+        } catch (IOException e) {
+            return null;
+        }
+
+    }
+
 
     /**
      * Parses the given level to get the log level. This method supports both
