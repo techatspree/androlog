@@ -30,6 +30,8 @@ import java.util.Properties;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
+import de.akquinet.android.androlog.reporter.Reporter;
+import de.akquinet.android.androlog.reporter.ReporterFactory;
 
 /**
  * Implements a small layer on top of the
@@ -164,6 +166,10 @@ public class Log {
 
     private static boolean reportingActivated;
 
+    private static List<Reporter> reporters = new ArrayList<Reporter>(0);
+
+    private static Context context;
+
     /**
      * Map storing the log levels.
      */
@@ -235,6 +241,7 @@ public class Log {
         maxOfEntriesInReports = 25;
         enableLogEntryCollection = false;
         entries = null;
+        reporters.clear();
     }
 
     /**
@@ -513,11 +520,18 @@ public class Log {
 
         // Do we need to store the log entries for Reports ?
         enableLogEntryCollection = false;
-        if (configuration.containsKey(ANDROLOG_REPORT_SENDERS)) {
-            // We enable the collection only if we have senders
-            String s = configuration.getProperty(ANDROLOG_REPORT_SENDERS);
+        if (context != null  && configuration.containsKey(ANDROLOG_REPORT_REPORTERS)) {
+            // We enable the collection only if we have reporters AND a valid context
+            String s = configuration.getProperty(ANDROLOG_REPORT_REPORTERS);
             String[] senders = s.split(",");
-            //TODO Create the senders.
+            for (String sender : senders) {
+                String cn = sender.trim();
+                Reporter reporter = ReporterFactory.newInstance(cn);
+                if (reporter != null) {
+                    reporter.configure(configuration);
+                    reporters.add(reporter);
+                }
+            }
             enableLogEntryCollection = true;
         }
 
