@@ -18,7 +18,8 @@ public class NoopReporter implements Reporter {
     }
 
     /**
-     * @see de.akquinet.android.androlog.reporter.Reporter#send(android.content.Context, java.lang.String, java.lang.Throwable)
+     * @see de.akquinet.android.androlog.reporter.Reporter#send(android.content.Context,
+     *      java.lang.String, java.lang.Throwable)
      */
     @Override
     public boolean send(Context context, String message, Throwable error) {
