@@ -1289,6 +1289,16 @@ public class Log {
         }
     }
 
+    public static void report() {
+        report(null, null);
+    }
+
+    public static void report(String message, Throwable error) {
+        for (Reporter reporter : reporters) {
+            reporter.send(context, message, error);
+        }
+    }
+
     private static void addEntry(String entry) {
         if (maxOfEntriesInReports > 0
                 && entries.size() == maxOfEntriesInReports) {
