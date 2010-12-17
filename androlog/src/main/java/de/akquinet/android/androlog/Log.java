@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -34,27 +35,25 @@ import de.akquinet.android.androlog.reporter.Reporter;
 import de.akquinet.android.androlog.reporter.ReporterFactory;
 
 /**
- * Implements a small layer on top of the
- * <a href="http://developer.android.com/reference/android/util/Log.html">Android Log</a>
- * to provide programmatic enabling and disabling of logging.
+ * Implements a small layer on top of the <a
+ * href="http://developer.android.com/reference/android/util/Log.html">Android
+ * Log</a> to provide programmatic enabling and disabling of logging as well as
+ * providing report support
  * <p>
- * To support <code>wtf</code> methods, Androlog detects if we're on Android 2.2+. If not,
- * the ASSERT level is used.
+ * To support <code>wtf</code> methods, Androlog detects if we're on Android
+ * 2.2+. If not, the ASSERT level is used.
  * </p>
  * <p>
- * Log methods returns an integer. This integer is the number of byte written in the log.
- * If a method returns 0, the message was not logged.
+ * Log methods returns an integer. This integer is the number of byte written in
+ * the log. If a method returns 0, the message was not logged.
+ * </p>
+ * <p>
+ * Reporting is enabled by defining {@link Reporter} objects and activating the
+ * reporting. Reporting is supported only if Androlog is initialized with an
+ * Android {@link Context}.
  * </p>
  */
 public class Log {
-
-    public static final String ANDROLOG_REPORT_LOG_ITEMS = "androlog.report.log.items";
-
-    public static final String ANDROLOG_REPORT_REPORTERS = "androlog.report.reporters";
-
-    public static final String ANDROLOG_REPORT_DEFAULT_LEVEL = "androlog.report.default.level";
-
-    public static final String ANDROLOG_REPORT_ACTIVE = "androlog.report.active";
 
     /**
      * Androlog Prefix. Properties starting with this prefix are not considered
@@ -78,12 +77,37 @@ public class Log {
     public static final String ANDROLOG_PROPERTIES = "androlog.properties";
 
     /**
-     * Property to deactivate the delagation on the Android Log wtf method
-     * which may cause the process to terminate.
-     * On android 2.2, this property allow to disable this delegation. Androlog
-     * then just log an ASSERT message.
+     * Property to deactivate the delagation on the Android Log wtf method which
+     * may cause the process to terminate. On android 2.2, this property allow
+     * to disable this delegation. Androlog then just log an ASSERT message.
      */
     public static final String ANDROLOG_DELEGATE_WTF = "androlog.delegate.wtf";
+
+    /**
+     * Property to set the number of log entry included in reports.
+     */
+    public static final String ANDROLOG_REPORT_LOG_ITEMS = "androlog.report.log.items";
+
+    /**
+     * Property defining the set of {@link Reporter}s. The property's value is a
+     * comma separated list of {@link Reporter} class name.
+     */
+    public static final String ANDROLOG_REPORT_REPORTERS = "androlog.report.reporters";
+
+    /**
+     * Property setting the log level for Reports.
+     */
+    public static final String ANDROLOG_REPORT_DEFAULT_LEVEL = "androlog.report.default.level";
+
+    /**
+     * Property setting the log level sending reports automatically.
+     */
+    public static final String ANDROLOG_REPORT_TRIGGER_LEVEL = "androlog.report.trigger.level";
+
+    /**
+     * Property activating the reporting.
+     */
+    public static final String ANDROLOG_REPORT_ACTIVE = "androlog.report.active";
 
     /**
      * Priority constant for the println method; use Log.v.
@@ -130,28 +154,24 @@ public class Log {
      */
     private static int defaultReportLevel = INFO;
 
-
     /**
-     * Android Log wtf method.
-     * wtf(String tag, String msg)
+     * Android Log wtf method. wtf(String tag, String msg)
      */
     private static Method wtfTagMessageMethod;
 
     /**
-     * Android Log wtf method.
-     * wtf(String tag, Throwable tr)
+     * Android Log wtf method. wtf(String tag, Throwable tr)
      */
     private static Method wtfTagErrorMethod;
 
     /**
-     * Android Log wtf method.
-     * wtf(String tag, String msg, Throwable tr)
+     * Android Log wtf method. wtf(String tag, String msg, Throwable tr)
      */
     private static Method wtfTagMessageErrorMethod;
 
     /**
-     * Sets to true if the wtf method delegates on the Android
-     * Log wtf methods which may cause the process to terminate.
+     * Sets to true if the wtf method delegates on the Android Log wtf methods
+     * which may cause the process to terminate.
      */
     private static boolean useWTF;
 
@@ -160,20 +180,40 @@ public class Log {
      */
     private static List<String> entries;
 
+    /**
+     * Flag enabling / Disabling the log entry collection.
+     */
     private static boolean enableLogEntryCollection;
 
+    /**
+     * Maximum number of entry to store.
+     */
     private static int maxOfEntriesInReports;
 
+    /**
+     * Flag indicating if the reporting is activated.
+     */
     private static boolean reportingActivated;
 
+    /**
+     * The list of reporters.
+     */
     private static List<Reporter> reporters = new ArrayList<Reporter>(0);
 
+    /**
+     * The Android context.
+     */
     private static Context context;
 
     /**
      * Map storing the log levels.
      */
     private static final Map<String, Integer> logLevels = new HashMap<String, Integer>();
+
+    /**
+     * Log level triggering reports
+     */
+    private static int reportTriggerLevel = ASSERT;
 
     /**
      * Private constructor to avoid creating instances of {@link Log}
@@ -211,12 +251,14 @@ public class Log {
     }
 
     /**
-     * Enables or disables the delegation to the Android log
-     * wtf methods. Those methods when present (android 2.2+)
-     * may cause the termination of the application.
-     * @param delegation enables or disables the delegation
-     * @return if the delegation is enabled. Indeed, on 1.6 and
-     * 2.0 it can't be enabled.
+     * Enables or disables the delegation to the Android log wtf methods. Those
+     * methods when present (android 2.2+) may cause the termination of the
+     * application.
+     *
+     * @param delegation
+     *            enables or disables the delegation
+     * @return if the delegation is enabled. Indeed, on 1.6 and 2.0 it can't be
+     *         enabled.
      */
     public static boolean setWTFDelegation(boolean delegation) {
         // We can't enable the wtf delegation if we're on 1.6 or 2.0
@@ -242,6 +284,7 @@ public class Log {
         enableLogEntryCollection = false;
         entries = null;
         reporters.clear();
+        reportTriggerLevel = ASSERT;
     }
 
     /**
@@ -260,9 +303,10 @@ public class Log {
      * Androlog init method. This method uses the Android API. This methods
      * computes the package ({@link Context#getPackageName()}) of the
      * application configuring the logger, and initializes the logger with a
-     * property file named 'package.properties' on the SDCARD or in the application
-     * assets (if the file cannot be found on the SDCard). If the file is readable
-     * and exist, the Log is configured. The file must be a valid Java properties file.
+     * property file named 'package.properties' on the SDCARD or in the
+     * application assets (if the file cannot be found on the SDCard). If the
+     * file is readable and exist, the Log is configured. The file must be a
+     * valid Java properties file.
      *
      * @see Properties
      */
@@ -285,27 +329,31 @@ public class Log {
     /**
      * Androlog Init Method. This method loads the Androlog Configuration from:
      * <ol>
-     * <li><code>/SDCARD/fileName</code> if the file name if not <code>null</code></li>
-     * <li><code>/SDCARD/Application_Package.properties</code> if
-     * the file name is <code>null</code> and context is not <code>null</code></li>
-     * <li><code>Application_Assets/fileName</code> if the file name if not <code>null</code>
-     * and the context is not <code>null</code></li>
-     * <li><code>Application_Assets/Application_Package.properties</code> if the file name is
+     * <li><code>/SDCARD/fileName</code> if the file name if not
+     * <code>null</code></li>
+     * <li><code>/SDCARD/Application_Package.properties</code> if the file name
+     * is <code>null</code> and context is not <code>null</code></li>
+     * <li><code>Application_Assets/fileName</code> if the file name if not
      * <code>null</code> and the context is not <code>null</code></li>
+     * <li><code>Application_Assets/Application_Package.properties</code> if the
+     * file name is <code>null</code> and the context is not <code>null</code></li>
      * </ol>
-     * The first found file is used, allowing overriding the configuration by just pushing a file
-     * on the SDCard.
-     * Passing <code>null</code> to both parameters is equivalent to the case 2. If the lookup
-     * failed, the logging is disabled.
-     * @param context the application context
-     * @param fileName the file name
+     * The first found file is used, allowing overriding the configuration by
+     * just pushing a file on the SDCard. Passing <code>null</code> to both
+     * parameters is equivalent to the case 2. If the lookup failed, the logging
+     * is disabled.
+     *
+     * @param context
+     *            the application context
+     * @param fileName
+     *            the file name
      */
     public static void init(Context context, String fileName) {
         reset();
         Log.context = context;
 
         String file = fileName;
-        if (file == null  && context != null) {
+        if (file == null && context != null) {
             file = context.getPackageName() + ".properties";
         }
 
@@ -332,15 +380,15 @@ public class Log {
             }
         }
 
-
     }
 
     /**
-     * Gets an input on a configuration file
-     * placed on the the SDCard.
-     * @param fileName the file name
-     * @return the input stream to read the file or <code>null</code>
-     * if the file does not exist.
+     * Gets an input on a configuration file placed on the the SDCard.
+     *
+     * @param fileName
+     *            the file name
+     * @return the input stream to read the file or <code>null</code> if the
+     *         file does not exist.
      */
     private static InputStream getConfigurationFileFromSDCard(String fileName) {
         File sdcard = Environment.getExternalStorageDirectory();
@@ -367,14 +415,17 @@ public class Log {
     }
 
     /**
-     * Gets an input on a configuration file
-     * placed in the application assets.
-     * @param context the Android context to use
-     * @param fileName the file name
-     * @return the input stream to read the file or <code>null</code>
-     * if the file does not exist.
+     * Gets an input on a configuration file placed in the application assets.
+     *
+     * @param context
+     *            the Android context to use
+     * @param fileName
+     *            the file name
+     * @return the input stream to read the file or <code>null</code> if the
+     *         file does not exist.
      */
-    private static InputStream getConfigurationFileFromAssets(Context context, String fileName) {
+    private static InputStream getConfigurationFileFromAssets(Context context,
+            String fileName) {
         if (context == null) {
             return null;
         }
@@ -391,7 +442,6 @@ public class Log {
         }
 
     }
-
 
     /**
      * Parses the given level to get the log level. This method supports both
@@ -425,6 +475,7 @@ public class Log {
         return defaultLogLevel;
     }
 
+
     /**
      * Sets the default log level.
      *
@@ -456,7 +507,7 @@ public class Log {
 
     /**
      * Gets the default report level.
-
+     *
      * @return the log level
      */
     public static int getDefaultReportLevel() {
@@ -471,14 +522,14 @@ public class Log {
      */
     public static void configure(Properties configuration) {
 
-        boolean activate = "true".equalsIgnoreCase(
-                configuration.getProperty(ANDROLOG_ACTIVE));
+        boolean activate = "true".equalsIgnoreCase(configuration
+                .getProperty(ANDROLOG_ACTIVE));
         if (activate) {
             activateLogging();
         }
 
-        boolean activate4Report = "true".equalsIgnoreCase(
-                configuration.getProperty(ANDROLOG_REPORT_ACTIVE));
+        boolean activate4Report = "true".equalsIgnoreCase(configuration
+                .getProperty(ANDROLOG_REPORT_ACTIVE));
         if (activate4Report) {
             activateReporting();
         }
@@ -491,7 +542,8 @@ public class Log {
         }
 
         if (configuration.containsKey(ANDROLOG_REPORT_DEFAULT_LEVEL)) {
-            String level = configuration.getProperty(ANDROLOG_REPORT_DEFAULT_LEVEL);
+            String level = configuration
+                    .getProperty(ANDROLOG_REPORT_DEFAULT_LEVEL);
             defaultReportLevel = getLevel(level);
         }
 
@@ -507,22 +559,25 @@ public class Log {
             }
         }
 
-
         if (useWTF) {
             // Check if androlog configuration does not override this.
             if (configuration.containsKey(ANDROLOG_DELEGATE_WTF)) {
                 String v = configuration.getProperty(ANDROLOG_DELEGATE_WTF);
-                // If androlog.delegate.wtf is set to true, we really call Log.wtf which
+                // If androlog.delegate.wtf is set to true, we really call
+                // Log.wtf which
                 // may terminate the process.
                 useWTF = "true".equals(v.toLowerCase());
-                // In other cases, androlog does log a message in the ASSERT level.
+                // In other cases, androlog does log a message in the ASSERT
+                // level.
             }
         }
 
         // Do we need to store the log entries for Reports ?
         enableLogEntryCollection = false;
-        if (context != null  && configuration.containsKey(ANDROLOG_REPORT_REPORTERS)) {
-            // We enable the collection only if we have reporters AND a valid context
+        if (context != null
+                && configuration.containsKey(ANDROLOG_REPORT_REPORTERS)) {
+            // We enable the collection only if we have reporters AND a valid
+            // context
             String s = configuration.getProperty(ANDROLOG_REPORT_REPORTERS);
             String[] senders = s.split(",");
             for (String sender : senders) {
@@ -533,6 +588,23 @@ public class Log {
                     reporters.add(reporter);
                 }
             }
+
+            // Define an default error handler, reporting the error.
+            Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread arg0, Throwable arg1) {
+                    report("Uncaught Exception", arg1);
+                }
+            });
+
+
+            if (configuration.containsKey(ANDROLOG_REPORT_TRIGGER_LEVEL)) {
+                String l = configuration.getProperty(ANDROLOG_REPORT_TRIGGER_LEVEL);
+                reportTriggerLevel = getLevel(l);
+            } else {
+                reportTriggerLevel = ASSERT;
+            }
+
             enableLogEntryCollection = true;
         }
 
@@ -549,21 +621,24 @@ public class Log {
     }
 
     /**
-     * Check if the android Log class contains the <code>wtf</code>
-     * method (Android 2.2+). In that case, the delegation to those
-     * method is enabled. If not, calling {@link Log#wtf(Object, String)}
-     * log a message with the level {@link Log#ASSERT}
+     * Check if the android Log class contains the <code>wtf</code> method
+     * (Android 2.2+). In that case, the delegation to those method is enabled.
+     * If not, calling {@link Log#wtf(Object, String)} log a message with the
+     * level {@link Log#ASSERT}
      */
     private static void detectWTFMethods() {
         // Check if wtf exists (android 2.2+)
-        // static int	 wtf(String tag, String msg)
-        // static int	 wtf(String tag, Throwable tr)
-        // static int	 wtf(String tag, String msg, Throwable tr)
+        // static int wtf(String tag, String msg)
+        // static int wtf(String tag, Throwable tr)
+        // static int wtf(String tag, String msg, Throwable tr)
         try {
-            wtfTagMessageMethod = android.util.Log.class.getMethod("wtf", new Class[] {String.class, String.class});
-            wtfTagErrorMethod = android.util.Log.class.getMethod("wtf", new Class[] {String.class, Throwable.class});
-            wtfTagMessageErrorMethod = android.util.Log.class.getMethod("wtf", new Class[] {String.class,
-                    String.class, Throwable.class});
+            wtfTagMessageMethod = android.util.Log.class.getMethod("wtf",
+                    new Class[] { String.class, String.class });
+            wtfTagErrorMethod = android.util.Log.class.getMethod("wtf",
+                    new Class[] { String.class, Throwable.class });
+            wtfTagMessageErrorMethod = android.util.Log.class
+                    .getMethod("wtf", new Class[] { String.class, String.class,
+                            Throwable.class });
             useWTF = true;
         } catch (Exception e) {
             // wtf is not defined, will use ASSERT level.
@@ -581,9 +656,7 @@ public class Log {
      *            The message you would like logged.
      */
     public static int v(String tag, String msg) {
-        if (isReportable(VERBOSE)) {
-            addEntry(print(VERBOSE, tag, msg, null));
-        }
+        collectLogEntry(VERBOSE, tag, msg, null);
         if (isLoggable(tag, VERBOSE)) {
             return android.util.Log.v(tag, msg);
         }
@@ -602,9 +675,7 @@ public class Log {
      *            An exception to log
      */
     public static int v(String tag, String msg, Throwable tr) {
-        if (isReportable(VERBOSE)) {
-            addEntry(print(VERBOSE, tag, msg, tr));
-        }
+        collectLogEntry(VERBOSE, tag, msg, tr);
         if (isLoggable(tag, VERBOSE)) {
             return android.util.Log.v(tag, msg, tr);
         }
@@ -670,9 +741,7 @@ public class Log {
      *            The message you would like logged.
      */
     public static int d(String tag, String msg) {
-        if (isReportable(DEBUG)) {
-            addEntry(print(DEBUG, tag, msg, null));
-        }
+        collectLogEntry(DEBUG, tag, msg, null);
         if (isLoggable(tag, DEBUG)) {
             return android.util.Log.d(tag, msg);
         }
@@ -691,9 +760,7 @@ public class Log {
      *            An exception to log
      */
     public static int d(String tag, String msg, Throwable tr) {
-        if (isReportable(DEBUG)) {
-            addEntry(print(DEBUG, tag, msg, tr));
-        }
+        collectLogEntry(DEBUG, tag, msg, tr);
         if (isLoggable(tag, DEBUG)) {
             return android.util.Log.d(tag, msg, tr);
         }
@@ -759,9 +826,7 @@ public class Log {
      *            The message you would like logged.
      */
     public static int i(String tag, String msg) {
-        if (isReportable(INFO)) {
-            addEntry(print(INFO, tag, msg, null));
-        }
+        collectLogEntry(INFO, tag, msg, null);
         if (isLoggable(tag, INFO)) {
             return android.util.Log.i(tag, msg);
         }
@@ -780,9 +845,7 @@ public class Log {
      *            An exception to log
      */
     public static int i(String tag, String msg, Throwable tr) {
-        if (isReportable(INFO)) {
-            addEntry(print(INFO, tag, msg, tr));
-        }
+        collectLogEntry(INFO, tag, msg, tr);
         if (isLoggable(tag, INFO)) {
             return android.util.Log.i(tag, msg, tr);
         }
@@ -848,9 +911,7 @@ public class Log {
      *            The message you would like logged.
      */
     public static int w(String tag, String msg) {
-        if (isReportable(WARN)) {
-            addEntry(print(WARN, tag, msg, null));
-        }
+        collectLogEntry(WARN, tag, msg, null);
         if (isLoggable(tag, WARN)) {
             return android.util.Log.w(tag, msg);
         }
@@ -869,9 +930,7 @@ public class Log {
      *            An exception to log
      */
     public static int w(String tag, String msg, Throwable tr) {
-        if (isReportable(WARN)) {
-             addEntry(print(WARN, tag, msg, tr));
-        }
+        collectLogEntry(WARN, tag, msg, tr);
         if (isLoggable(tag, WARN)) {
             return android.util.Log.w(tag, msg, tr);
         }
@@ -933,9 +992,7 @@ public class Log {
      *            An exception to log
      */
     public static int w(String tag, Throwable tr) {
-        if (isReportable(WARN)) {
-            addEntry(print(WARN, tag, "", null));
-        }
+        collectLogEntry(WARN, tag, "", null);
         if (isLoggable(tag, WARN)) {
             return android.util.Log.w(tag, tr);
         }
@@ -952,9 +1009,7 @@ public class Log {
      *            The message you would like logged.
      */
     public static int e(String tag, String msg) {
-        if (isReportable(ERROR)) {
-            addEntry(print(ERROR, tag, msg, null));
-        }
+        collectLogEntry(ERROR, tag, msg, null);
         if (isLoggable(tag, ERROR)) {
             return android.util.Log.e(tag, msg);
         }
@@ -973,9 +1028,7 @@ public class Log {
      *            An exception to log
      */
     public static int e(String tag, String msg, Throwable tr) {
-        if (isReportable(ERROR)) {
-            addEntry(print(ERROR, tag, msg, tr));
-        }
+        collectLogEntry(ERROR, tag, msg, tr);
         if (isLoggable(tag, ERROR)) {
             return android.util.Log.e(tag, msg, tr);
         }
@@ -1031,13 +1084,15 @@ public class Log {
     }
 
     /**
-     * What a Terrible Failure: Report a condition that should never happen.
-     * The error will always be logged at level ASSERT despite the logging is disabled.
-     * Depending on system configuration, and on Android 2.2+, a report may be added to
-     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     * What a Terrible Failure: Report a condition that should never happen. The
+     * error will always be logged at level ASSERT despite the logging is
+     * disabled. Depending on system configuration, and on Android 2.2+, a
+     * report may be added to the DropBoxManager and/or the process may be
+     * terminated immediately with an error dialog.
      *
-     * On older Android version (before 2.2), the message is logged with the Assert level. Those
-     * log messages will always be logged.
+     * On older Android version (before 2.2), the message is logged with the
+     * Assert level. Those log messages will always be logged.
+     *
      * @param tag
      *            Used to identify the source of a log message. It usually
      *            identifies the class or activity where the log call occurs.
@@ -1045,14 +1100,12 @@ public class Log {
      *            The message you would like logged.
      */
     public static int wtf(String tag, String msg) {
-        if (isReportable(ASSERT)) {
-            addEntry(print(ASSERT, tag, msg, null));
-        }
+        collectLogEntry(ASSERT, tag, msg, null);
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
                 try {
-                    return  (Integer)
-                        wtfTagMessageMethod.invoke(null, new Object[] {tag, msg});
+                    return (Integer) wtfTagMessageMethod.invoke(null,
+                            new Object[] { tag, msg });
                 } catch (Exception e) {
                     return println(ASSERT, tag, msg);
                 }
@@ -1064,13 +1117,15 @@ public class Log {
     }
 
     /**
-     * What a Terrible Failure: Report a condition that should never happen.
-     * The error will always be logged at level ASSERT despite the logging is disabled.
-     * Depending on system configuration, and on Android 2.2+, a report may be added to
-     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     * What a Terrible Failure: Report a condition that should never happen. The
+     * error will always be logged at level ASSERT despite the logging is
+     * disabled. Depending on system configuration, and on Android 2.2+, a
+     * report may be added to the DropBoxManager and/or the process may be
+     * terminated immediately with an error dialog.
      *
-     * On older Android version (before 2.2), the message is logged with the Assert level. Those
-     * log messages will always be logged.
+     * On older Android version (before 2.2), the message is logged with the
+     * Assert level. Those log messages will always be logged.
+     *
      * @param tag
      *            Used to identify the source of a log message. It usually
      *            identifies the class or activity where the log call occurs.
@@ -1078,13 +1133,12 @@ public class Log {
      *            The exception to log
      */
     public static int wtf(String tag, Throwable tr) {
-        if (isReportable(ASSERT)) {
-            addEntry(print(ASSERT, tag, "", null));
-        }
+        collectLogEntry(VERBOSE, tag, "", tr);
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
                 try {
-                    return (Integer) wtfTagErrorMethod.invoke(null, new Object[] {tag, tr});
+                    return (Integer) wtfTagErrorMethod.invoke(null,
+                            new Object[] { tag, tr });
                 } catch (Exception e) {
                     return println(ASSERT, tag, getStackTraceString(tr));
                 }
@@ -1096,13 +1150,15 @@ public class Log {
     }
 
     /**
-     * What a Terrible Failure: Report a condition that should never happen.
-     * The error will always be logged at level ASSERT despite the logging is disabled.
-     * Depending on system configuration, and on Android 2.2+, a report may be added to
-     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     * What a Terrible Failure: Report a condition that should never happen. The
+     * error will always be logged at level ASSERT despite the logging is
+     * disabled. Depending on system configuration, and on Android 2.2+, a
+     * report may be added to the DropBoxManager and/or the process may be
+     * terminated immediately with an error dialog.
      *
-     * On older Android version (before 2.2), the message is logged with the Assert level. Those
-     * log messages will always be logged.
+     * On older Android version (before 2.2), the message is logged with the
+     * Assert level. Those log messages will always be logged.
+     *
      * @param tag
      *            Used to identify the source of a log message. It usually
      *            identifies the class or activity where the log call occurs.
@@ -1112,31 +1168,34 @@ public class Log {
      *            The exception to log
      */
     public static int wtf(String tag, String msg, Throwable tr) {
-        if (isReportable(ASSERT)) {
-            addEntry(print(ASSERT, tag, msg, tr));
-        }
+        collectLogEntry(ASSERT, tag, msg, tr);
         if (isLoggable(tag, ASSERT)) {
             if (useWTF) {
                 try {
-                    return (Integer) wtfTagMessageErrorMethod.invoke(null, new Object[] {tag, msg, tr});
+                    return (Integer) wtfTagMessageErrorMethod.invoke(null,
+                            new Object[] { tag, msg, tr });
                 } catch (Exception e) {
-                    return println(ASSERT, tag, msg + '\n' + getStackTraceString(tr));
+                    return println(ASSERT, tag, msg + '\n'
+                            + getStackTraceString(tr));
                 }
             } else {
-                return println(ASSERT, tag, msg + '\n' + getStackTraceString(tr));
+                return println(ASSERT, tag, msg + '\n'
+                        + getStackTraceString(tr));
             }
         }
         return 0;
     }
 
     /**
-     * What a Terrible Failure: Report a condition that should never happen.
-     * The error will always be logged at level ASSERT despite the logging is disabled.
-     * Depending on system configuration, and on Android 2.2+, a report may be added to
-     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     * What a Terrible Failure: Report a condition that should never happen. The
+     * error will always be logged at level ASSERT despite the logging is
+     * disabled. Depending on system configuration, and on Android 2.2+, a
+     * report may be added to the DropBoxManager and/or the process may be
+     * terminated immediately with an error dialog.
      *
-     * On older Android version (before 2.2), the message is logged with the Assert level. Those
-     * log messages will always be logged.
+     * On older Android version (before 2.2), the message is logged with the
+     * Assert level. Those log messages will always be logged.
+     *
      * @param object
      *            Used to compute the tag.
      * @param msg
@@ -1152,13 +1211,15 @@ public class Log {
     }
 
     /**
-     * What a Terrible Failure: Report a condition that should never happen.
-     * The error will always be logged at level ASSERT despite the logging is disabled.
-     * Depending on system configuration, and on Android 2.2+, a report may be added to
-     * the DropBoxManager and/or the process may be terminated immediately with an error dialog.
+     * What a Terrible Failure: Report a condition that should never happen. The
+     * error will always be logged at level ASSERT despite the logging is
+     * disabled. Depending on system configuration, and on Android 2.2+, a
+     * report may be added to the DropBoxManager and/or the process may be
+     * terminated immediately with an error dialog.
      *
-     * On older Android version (before 2.2), the message is logged with the Assert level. Those
-     * log messages will always be logged.
+     * On older Android version (before 2.2), the message is logged with the
+     * Assert level. Those log messages will always be logged.
+     *
      * @param object
      *            Used to compute the tag.
      * @param msg
@@ -1179,7 +1240,8 @@ public class Log {
      * {@link #setDefaultLogLevel(int)}. This means that any level above and
      * including that level will be logged.
      *
-     * Use {@link #configure(Properties)} to define different log levels for each tag.
+     * Use {@link #configure(Properties)} to define different log levels for
+     * each tag.
      *
      * @param tag
      *            The tag to check.
@@ -1190,7 +1252,7 @@ public class Log {
      *             is thrown if the tag.length() > 23.
      */
     public static boolean isLoggable(String tag, int level) {
-        if (!activated  && level != ASSERT) {
+        if (!activated && level != ASSERT) {
             return false;
         }
         Integer logLevel = logLevels.get(tag);
@@ -1201,8 +1263,7 @@ public class Log {
     }
 
     /**
-     * Checks to see whether or not a log is reportable at
-     * the specified level.
+     * Checks to see whether or not a log is reportable at the specified level.
      *
      * The default level of any tag is set as specified in
      * {@link #setDefaultReportLevel(int)}. This means that any level above and
@@ -1213,19 +1274,19 @@ public class Log {
      * @return Whether or not that this is allowed to be reported.
      */
     public static boolean isReportable(int level) {
-        return reportingActivated
-            && enableLogEntryCollection
-            && level >= defaultReportLevel;
+        return reportingActivated && enableLogEntryCollection
+                && level >= defaultReportLevel;
     }
 
     /**
-     * Checks to see whether or not a log for the specified object is loggable at
-     * the specified level. The tag is computed from the given object (qualified
-     * class name).
+     * Checks to see whether or not a log for the specified object is loggable
+     * at the specified level. The tag is computed from the given object
+     * (qualified class name).
+     *
      * @param object
-     * 				the object.
+     *            the object.
      * @param level
-     * 				the level to check.
+     *            the level to check.
      * @return Whether or not that this is allowed to be logged.
      */
     public static boolean isLoggable(Object object, int level) {
@@ -1269,18 +1330,29 @@ public class Log {
      * @param msg
      *            The message you would like logged.
      * @param tr
-     * 			  The error, can be <code>null</code>
+     *            The error, can be <code>null</code>
      * @return The String form.
      */
-    public static String print(int priority, String tag, String msg, Throwable tr) {
+    public static String print(int priority, String tag, String msg,
+            Throwable tr) {
         // Compute the letter for the given priority
         String p = "X"; // X => Unknown
-        switch(priority) {
-            case DEBUG: p = "D"; break;
-            case INFO: p = "I"; break;
-            case WARN: p = "W"; break;
-            case ERROR: p = "E"; break;
-            case ASSERT: p = "F"; break;
+        switch (priority) {
+        case DEBUG:
+            p = "D";
+            break;
+        case INFO:
+            p = "I";
+            break;
+        case WARN:
+            p = "W";
+            break;
+        case ERROR:
+            p = "E";
+            break;
+        case ASSERT:
+            p = "F";
+            break;
         }
         if (tr == null) {
             return p + "/" + tag + ": " + msg;
@@ -1289,10 +1361,27 @@ public class Log {
         }
     }
 
+    /**
+     * Triggers a report without message and error
+     *
+     * @return <code>true</code> if the report was successfully sent by
+     *         <b>all</b> reporters, <code>false</code> otherwise.
+     */
     public static boolean report() {
         return report(null, null);
     }
 
+    /**
+     * Triggers a Report. This method generates the report and send it with all
+     * configured reporters.
+     *
+     * @param message
+     *            the message
+     * @param error
+     *            the error
+     * @return <code>true</code> if the report was successfully sent by
+     *         <b>all</b> reporters, <code>false</code> otherwise.
+     */
     public static boolean report(String message, Throwable error) {
         boolean acc = true;
         for (Reporter reporter : reporters) {
@@ -1301,14 +1390,52 @@ public class Log {
         return acc;
     }
 
-    private static void addEntry(String entry) {
+    /**
+     * Adds a log entry to the collected entry list. This method managed the
+     * maximum number of entries and triggers report if the entry priority is
+     * superior or equals to the report trigger level.
+     *
+     * @param level
+     *            the log level of the entry
+     * @param tag
+     *            the tag
+     * @param message
+     *            the message
+     * @param err
+     *            the error message
+     */
+    private static void collectLogEntry(int level, String tag, final String message,
+            final Throwable err) {
+        if (!isReportable(level)) {
+            return;
+        }
+
         if (maxOfEntriesInReports > 0
                 && entries.size() == maxOfEntriesInReports) {
             entries.remove(0); // Remove the first element.
         }
-        entries.add(entry);
+        entries.add(print(level, tag, message, err));
+
+        if (level >= reportTriggerLevel) {
+            // Must be in another thread
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        report(message, err);
+                    } catch (Throwable e) {
+                        // Ignore
+                    }
+                }
+            }).start();
+        }
     }
 
+    /**
+     * Gets the list of reported entries.
+     *
+     * @return a copy of the reported entries or <code>null</code> if no entries
+     *         were collected.
+     */
     public static List<String> getReportedEntries() {
         if (entries != null) {
             return new ArrayList<String>(entries);
