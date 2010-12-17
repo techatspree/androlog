@@ -48,7 +48,7 @@ public class Log {
 
     public static final String ANDROLOG_REPORT_LOG_ITEMS = "androlog.report.log.items";
 
-    public static final String ANDROLOG_REPORT_SENDERS = "androlog.report.senders";
+    public static final String ANDROLOG_REPORT_REPORTERS = "androlog.report.reporters";
 
     public static final String ANDROLOG_REPORT_DEFAULT_LEVEL = "androlog.report.default.level";
 
