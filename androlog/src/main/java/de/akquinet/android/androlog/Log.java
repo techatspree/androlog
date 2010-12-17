@@ -1289,14 +1289,16 @@ public class Log {
         }
     }
 
-    public static void report() {
-        report(null, null);
+    public static boolean report() {
+        return report(null, null);
     }
 
-    public static void report(String message, Throwable error) {
+    public static boolean report(String message, Throwable error) {
+        boolean acc = true;
         for (Reporter reporter : reporters) {
-            reporter.send(context, message, error);
+            acc = acc && reporter.send(context, message, error);
         }
+        return acc;
     }
 
     private static void addEntry(String entry) {
