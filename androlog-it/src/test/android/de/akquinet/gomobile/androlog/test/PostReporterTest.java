@@ -82,10 +82,10 @@ public class PostReporterTest extends AndroidTestCase {
         Assert.assertFalse(list.isEmpty());
         Assert.assertEquals(2, list.size()); // i + w
 
-        Log.report();
-        Log.report("this is a user message", null);
+        assertTrue(Log.report());
+        assertTrue(Log.report("this is a user message", null));
         Exception error = new MalformedChallengeException("error message", new  NumberFormatException());
-        Log.report(null, error);
+        assertTrue(Log.report(null, error));
     }
 
     public void testPostWithLongLog() {
@@ -103,10 +103,10 @@ public class PostReporterTest extends AndroidTestCase {
         Assert.assertFalse(list.isEmpty());
         Assert.assertEquals(25, list.size());
 
-        Log.report();
-        Log.report("this is a user message", null);
+        assertTrue(Log.report());
+        assertTrue(Log.report("this is a user message", null));
         Exception error = new MalformedChallengeException("error message", new  NumberFormatException());
-        Log.report(null, error);
+        assertTrue(Log.report(null, error));
     }
 
 
