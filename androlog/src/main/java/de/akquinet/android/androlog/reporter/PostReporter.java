@@ -15,8 +15,7 @@ import android.content.Context;
 import de.akquinet.android.androlog.Log;
 
 /**
- * Reporter posting the report to a given URL.
- * It uses a plain HTTP POST.
+ * Reporter posting the report to a given URL. It uses a plain HTTP POST.
  */
 public class PostReporter implements Reporter {
 
@@ -32,35 +31,39 @@ public class PostReporter implements Reporter {
     private URL url;
 
     /**
-     * Configures the POST Reporter.
-     * The given configuration <b>must</b> contain the {@link PostReporter#ANDROLOG_REPORTER_POST_URL}
-     * property and it must be a valid {@link URL}.
+     * Configures the POST Reporter. The given configuration <b>must</b> contain
+     * the {@link PostReporter#ANDROLOG_REPORTER_POST_URL} property and it must
+     * be a valid {@link URL}.
+     *
      * @see de.akquinet.android.androlog.reporter.Reporter#configure(java.util.Properties)
      */
     @Override
     public void configure(Properties configuration) {
         String u = configuration.getProperty(ANDROLOG_REPORTER_POST_URL);
         if (u == null) {
-            Log.e(this,
-                    "The Property " + ANDROLOG_REPORTER_POST_URL + " is mandatory");
+            Log.e(this, "The Property " + ANDROLOG_REPORTER_POST_URL
+                    + " is mandatory");
             return;
         }
         try {
             url = new URL(u);
         } catch (MalformedURLException e) {
-            Log.e(this,
-                    "The Property " + ANDROLOG_REPORTER_POST_URL + " is not a valid url", e);
+            Log.e(this, "The Property " + ANDROLOG_REPORTER_POST_URL
+                    + " is not a valid url", e);
         }
     }
 
     /**
      * If the reporter was configured correctly, post the report to the set URL.
-     * @see de.akquinet.android.androlog.reporter.Reporter#send(android.content.Context, java.lang.String, java.lang.Throwable)
+     *
+     * @see de.akquinet.android.androlog.reporter.Reporter#send(android.content.Context,
+     *      java.lang.String, java.lang.Throwable)
      */
     @Override
     public boolean send(Context context, String mes, Throwable err) {
         if (url != null) {
-            String report = new Report(context, mes, err).getReportAsJSON().toString();
+            String report = new Report(context, mes, err).getReportAsJSON()
+                    .toString();
             try {
                 post(url, "report=" + report);
                 return true;
@@ -73,10 +76,14 @@ public class PostReporter implements Reporter {
 
     /**
      * Executes the given request as a HTTP POST action.
-     * @param url the url
-     * @param params the parameter
+     *
+     * @param url
+     *            the url
+     * @param params
+     *            the parameter
      * @return the response as a String.
-     * @throws IOException if the server cannot be reached
+     * @throws IOException
+     *             if the server cannot be reached
      */
     public static void post(URL url, String params) throws IOException {
         URLConnection conn = url.openConnection();
@@ -86,7 +93,7 @@ public class PostReporter implements Reporter {
             conn.setDoOutput(true);
             writer = new OutputStreamWriter(conn.getOutputStream(),
                     Charset.forName("UTF-8"));
-            //write parameters
+            // write parameters
             writer.write(params);
             writer.flush();
             System.out.println(read(conn.getInputStream()));
@@ -118,6 +125,5 @@ public class PostReporter implements Reporter {
 
         return out.toString();
     }
-
 
 }
