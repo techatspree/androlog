@@ -40,7 +40,7 @@ public class ReportingInitTest extends AndroidTestCase {
             Properties propsDefault = new Properties();
             propsDefault.setProperty(Log.ANDROLOG_ACTIVE, "true");
             propsDefault.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
-            propsDefault.setProperty(Log.ANDROLOG_REPORT_SENDERS, "noop");
+            propsDefault.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.NoopReporter");
 
             defaultFile = new File(Environment.getExternalStorageDirectory(),
                     Log.ANDROLOG_PROPERTIES);
@@ -52,7 +52,7 @@ public class ReportingInitTest extends AndroidTestCase {
             Properties propsActive = new Properties();
             propsActive.setProperty(Log.ANDROLOG_ACTIVE, "true");
             propsActive.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
-            propsActive.setProperty(Log.ANDROLOG_REPORT_SENDERS, "noop");
+            propsActive.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.NoopReporter");
             activate = new File(Environment.getExternalStorageDirectory(),
                     "activate.properties");
             testContext = new File(Environment.getExternalStorageDirectory(),
@@ -71,7 +71,7 @@ public class ReportingInitTest extends AndroidTestCase {
             Properties propsDeactive = new Properties();
             propsDeactive.setProperty(Log.ANDROLOG_ACTIVE, "false");
             propsDeactive.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
-            propsDeactive.setProperty(Log.ANDROLOG_REPORT_SENDERS, "noop");
+            propsDeactive.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.NoopReporter");
             deactivate = new File(Environment.getExternalStorageDirectory(),
                     "deactivate.properties");
             deactivate.createNewFile();
@@ -84,7 +84,7 @@ public class ReportingInitTest extends AndroidTestCase {
             propsDefaultLevel.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
             propsDefaultLevel.setProperty(Log.ANDROLOG_DEFAULT_LEVEL, "ERROR");
             propsDefaultLevel.setProperty(Log.ANDROLOG_REPORT_DEFAULT_LEVEL, "ERROR");
-            propsDefaultLevel.setProperty(Log.ANDROLOG_REPORT_SENDERS, "noop");
+            propsDefaultLevel.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.NoopReporter");
             activateAndDefault = new File(
                     Environment.getExternalStorageDirectory(),
                     "activateAndDefault.properties");
@@ -110,7 +110,7 @@ public class ReportingInitTest extends AndroidTestCase {
     }
 
     public void testDefaultReport() {
-        Log.init();
+        Log.init(getContext());
         Assert.assertEquals(Log.INFO, Log.getDefaultLogLevel());
         String message = "This is a INFO test";
         String tag = "my.log.info";
@@ -138,7 +138,7 @@ public class ReportingInitTest extends AndroidTestCase {
     }
 
     public void testReportWithActivateFile() {
-        Log.init(activate.getName());
+        Log.init(getContext(), activate.getName());
         String message = "This is a INFO test";
         String tag = "my.log.info";
         Log.d(tag, message);
@@ -163,7 +163,7 @@ public class ReportingInitTest extends AndroidTestCase {
     }
 
     public void testReportWithDeactivatedLog() {
-        Log.init(deactivate.getName());
+        Log.init(getContext(), deactivate.getName());
         String message = "This is a INFO test";
         String tag = "my.log.info";
         Log.d(tag, message);
@@ -177,7 +177,7 @@ public class ReportingInitTest extends AndroidTestCase {
     }
 
     public void testReportWithActivateAndDefaultFile() {
-        Log.init(activateAndDefault.getName());
+        Log.init(getContext(), activateAndDefault.getName());
         Assert.assertEquals(Log.ERROR, Log.getDefaultLogLevel());
         String message = "This is a INFO test";
         String tag = "my.log.info";
