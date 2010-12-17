@@ -302,6 +302,7 @@ public class Log {
      */
     public static void init(Context context, String fileName) {
         reset();
+        Log.context = context;
 
         String file = fileName;
         if (file == null  && context != null) {
