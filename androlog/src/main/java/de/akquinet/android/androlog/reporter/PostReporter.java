@@ -14,11 +14,29 @@ import java.util.Properties;
 import android.content.Context;
 import de.akquinet.android.androlog.Log;
 
+/**
+ * Reporter posting the report to a given URL.
+ * It uses a plain HTTP POST.
+ */
 public class PostReporter implements Reporter {
 
+    /**
+     * Mandatory Property to set the URL.
+     */
+
     public static final String ANDROLOG_REPORTER_POST_URL = "androlog.reporter.post.url";
+
+    /**
+     * The URL object.
+     */
     private URL url;
 
+    /**
+     * Configures the POST Reporter.
+     * The given configuration <b>must</b> contain the {@link PostReporter#ANDROLOG_REPORTER_POST_URL}
+     * property and it must be a valid {@link URL}.
+     * @see de.akquinet.android.androlog.reporter.Reporter#configure(java.util.Properties)
+     */
     @Override
     public void configure(Properties configuration) {
         String u = configuration.getProperty(ANDROLOG_REPORTER_POST_URL);
@@ -35,16 +53,22 @@ public class PostReporter implements Reporter {
         }
     }
 
+    /**
+     * If the reporter was configured correctly, post the report to the set URL.
+     * @see de.akquinet.android.androlog.reporter.Reporter#send(android.content.Context, java.lang.String, java.lang.Throwable)
+     */
     @Override
-    public void send(Context context, String mes, Throwable err) {
+    public boolean send(Context context, String mes, Throwable err) {
         if (url != null) {
             String report = new Report(context, mes, err).getReportAsJSON().toString();
             try {
                 post(url, "report=" + report);
+                return true;
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        return false;
     }
 
     /**

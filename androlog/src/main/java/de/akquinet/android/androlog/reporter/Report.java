@@ -14,18 +14,45 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import de.akquinet.android.androlog.Log;
 
+/**
+ * Report structure.
+ * This class defines report content.
+ */
 public class Report {
 
+    /**
+     * The Android context.
+     */
     private Context context;
+
+    /**
+     * An optional message.
+     */
     private String message;
+
+    /**
+     * An optional error message.
+     */
     private Throwable err;
 
+    /**
+     * Creates a new report.
+     * All reporters share the same report object, so they <b>must</b>
+     * not modify the report.
+     * @param context the context
+     * @param message the message
+     * @param err the error
+     */
     public Report(Context context, String message, Throwable err) {
         this.context = context;
         this.message = message;
         this.err = err;
     }
 
+    /**
+     * Creates the report as a JSON Object.
+     * @return the json object containing the report.
+     */
     public JSONObject getReportAsJSON() {
         JSONObject report = new JSONObject();
 
@@ -41,6 +68,11 @@ public class Report {
         return report;
     }
 
+    /**
+     * Adds the log entries to the report.
+     * @param report the report
+     * @throws JSONException if the log entries cannot be added
+     */
     private void addLog(JSONObject report) throws JSONException {
         JSONObject logs = new JSONObject();
         List<String> list = Log.getReportedEntries();
@@ -55,6 +87,11 @@ public class Report {
         report.put("log", logs);
     }
 
+    /**
+     * Adds the device data to the report.
+     * @param report the report
+     * @throws JSONException if the device data cannot be added
+     */
     private void addDeviceData(JSONObject report) throws JSONException {
         JSONObject device = new JSONObject();
         device.put("device", Build.DEVICE);
@@ -67,6 +104,11 @@ public class Report {
         report.put("device", device);
     }
 
+    /**
+     * Adds the application data to the report.
+     * @param report the report
+     * @throws JSONException if the application data cannot be added
+     */
     private void addApplicationData(JSONObject report) throws JSONException {
         JSONObject app = new JSONObject();
         app.put("package", context.getPackageName());
@@ -81,6 +123,12 @@ public class Report {
         report.put("application", app);
     }
 
+    /**
+     * Adds the report header to the report (dates, locale, message, errors
+     * ...).
+     * @param report the report
+     * @throws JSONException if the data cannot be added
+     */
     private void addReportHeader(JSONObject report) throws JSONException {
         JSONObject dates = new JSONObject();
         dates.put("date.system", System.currentTimeMillis());
