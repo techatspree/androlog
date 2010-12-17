@@ -109,6 +109,46 @@ public class PostReporterTest extends AndroidTestCase {
         assertTrue(Log.report(null, error));
     }
 
+    public void testReportOnNonCatchError() throws InterruptedException {
+        Log.init(getContext());
+        String message = "This is a INFO test";
+        String tag = "my.log.info";
+        Log.d(tag, message);
+        Log.i(tag, message);
+        Log.w(tag, message);
+        for (int i = 0; i < 200; i++) {
+            Log.w("" + i);
+        }
 
+        Runnable run = new Runnable() {
+            public void run() {
+                Log.e("oh oh");
+                throw new UnsupportedOperationException("...");
+            }
+        };
+        new Thread(run).start();
+
+        Thread.sleep(2000);
+
+    }
+
+
+    public void testReportOnAssert() {
+        Log.init(getContext());
+        String message = "This is a INFO test";
+        String tag = "my.log.info";
+        Log.d(tag, message);
+        Log.i(tag, message);
+        Log.w(tag, message);
+        for (int i = 0; i < 200; i++) {
+            Log.w("" + i);
+        }
+        List<String> list = Log.getReportedEntries();
+        Assert.assertNotNull(list);
+        Assert.assertFalse(list.isEmpty());
+        Assert.assertEquals(25, list.size());
+
+        Log.wtf(this, "What a terrible failure !", null);
+    }
 
 }
