@@ -71,6 +71,7 @@ public class MailReporter implements Reporter {
             intent.putExtra(Intent.EXTRA_SUBJECT, "Application Error Report");
             intent.putExtra(Intent.EXTRA_TEXT, report);
             intent.putExtra(Intent.EXTRA_EMAIL, new String[] { to });
+            intent.setType("message/rfc822");
 
             // Create a new task because we're not sure to be an Activity
             if (!(context instanceof Activity)) {
