@@ -48,6 +48,8 @@ public class PostReporterTest extends AndroidTestCase {
             propsActive.setProperty(Log.ANDROLOG_ACTIVE, "true");
             propsActive.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
             propsActive.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.PostReporter");
+            propsActive.setProperty(Log.ANDROLOG_REPORT_EXCEPTION_HANDLER_PROPAGATION, "false");
+
             propsActive.setProperty(PostReporter.ANDROLOG_REPORTER_POST_URL, "http://androlog-reporter.appspot.com/androlog_reporter");
 
             testContext = new File(Environment.getExternalStorageDirectory(),

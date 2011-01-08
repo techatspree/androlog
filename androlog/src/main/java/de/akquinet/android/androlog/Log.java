@@ -110,6 +110,17 @@ public class Log {
     public static final String ANDROLOG_REPORT_ACTIVE = "androlog.report.active";
 
     /**
+     * Property disabling the {@link UncaughtExceptionHandler}, enabled by default.
+     */
+    public static final String ANDROLOG_REPORT_EXCEPTION_HANDLER = "androlog.report.exception.handler";
+
+    /**
+     * Property disabling the propagation to the default {@link UncaughtExceptionHandler},
+     * enabled by default.
+     */
+    public static final String ANDROLOG_REPORT_EXCEPTION_HANDLER_PROPAGATION = "androlog.report.exception.handler.propagation";
+
+    /**
      * Priority constant for the println method; use Log.v.
      */
     public static final int VERBOSE = android.util.Log.VERBOSE;
@@ -214,6 +225,18 @@ public class Log {
      * Log level triggering reports
      */
     private static int reportTriggerLevel = ASSERT;
+
+    /**
+     * Is the {@link UncaughtExceptionHandler} enabled ?
+     */
+    private static boolean exceptionHandlerActivated = true;
+
+    /**
+     * Is the propagation to the default {@link UncaughtExceptionHandler}
+     * enabled ?
+     */
+    private static boolean exceptionHandlerPropagation = true;
+
 
     /**
      * Private constructor to avoid creating instances of {@link Log}
@@ -589,14 +612,31 @@ public class Log {
                 }
             }
 
-            // Define an default error handler, reporting the error.
-            Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-                @Override
-                public void uncaughtException(Thread arg0, Throwable arg1) {
-                    report("Uncaught Exception", arg1);
-                }
-            });
+            // Configure the UncaughtExceptionHandler
+            if (configuration.containsKey(ANDROLOG_REPORT_EXCEPTION_HANDLER)
+                    && "false".equals(configuration.getProperty(ANDROLOG_REPORT_EXCEPTION_HANDLER))) {
+                exceptionHandlerActivated = false;
+            }
 
+            if (configuration.containsKey(ANDROLOG_REPORT_EXCEPTION_HANDLER_PROPAGATION)
+                    && "false".equals(configuration.getProperty(ANDROLOG_REPORT_EXCEPTION_HANDLER_PROPAGATION))) {
+                exceptionHandlerPropagation = false;
+            }
+
+            // Define an default error handler, reporting the error.
+            if (exceptionHandlerActivated) {
+                final UncaughtExceptionHandler originalHandler = Thread.getDefaultUncaughtExceptionHandler();
+                Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                    @Override
+                    public void uncaughtException(Thread arg0, Throwable arg1) {
+                        report("Uncaught Exception", arg1);
+                        // If there is a original handler, propagate the exception.
+                        if (exceptionHandlerPropagation  && originalHandler != null) {
+                            originalHandler.uncaughtException(arg0, arg1);
+                        }
+                    }
+                });
+            }
 
             if (configuration.containsKey(ANDROLOG_REPORT_TRIGGER_LEVEL)) {
                 String l = configuration.getProperty(ANDROLOG_REPORT_TRIGGER_LEVEL);
