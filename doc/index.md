@@ -67,4 +67,4 @@ Documentation
 * [[The Androlog developer guide|Androlog-developer]]
 * [[Javadoc|http://akquinet.github.com/androlog/javadoc]]
 
-
+<script src="https://gist.github.com/641920.js"> </script>
