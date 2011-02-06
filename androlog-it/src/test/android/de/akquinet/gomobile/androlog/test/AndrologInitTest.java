@@ -22,7 +22,6 @@ import junit.framework.Assert;
 import android.content.res.AssetManager;
 import android.os.Environment;
 import android.test.AndroidTestCase;
-import android.test.mock.MockContext;
 import de.akquinet.android.androlog.Log;
 
 public class AndrologInitTest extends AndroidTestCase {
