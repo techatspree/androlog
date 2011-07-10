@@ -102,7 +102,6 @@ public class PostReporter implements Reporter {
     public static void post(URL url, String params) throws IOException {
         URLConnection conn = url.openConnection();
         OutputStreamWriter writer = null;
-        System.out.println("Posting report to " + url.toExternalForm());
         try {
             conn.setDoOutput(true);
             writer = new OutputStreamWriter(conn.getOutputStream(),
@@ -110,7 +109,6 @@ public class PostReporter implements Reporter {
             // write parameters
             writer.write(params);
             writer.flush();
-            System.out.println(read(conn.getInputStream()));
         } finally {
             if (writer != null) {
                 writer.close();
