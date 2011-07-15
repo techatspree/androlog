@@ -26,6 +26,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.view.Display;
+import android.view.WindowManager;
 import de.akquinet.android.androlog.Log;
 
 /**
@@ -110,6 +112,13 @@ public class Report {
         JSONObject device = new JSONObject();
         device.put("device", Build.DEVICE);
         device.put("brand", Build.BRAND);
+        
+        Object windowService = context.getSystemService(Context.WINDOW_SERVICE);
+        if (windowService instanceof WindowManager) {
+            Display display = ((WindowManager)windowService).getDefaultDisplay();
+            device.put("resolution", display.getWidth() + "x" + display.getHeight());
+            device.put("orientation", display.getOrientation());
+        }
         device.put("display", Build.DISPLAY);
         device.put("manufacturer", Build.MANUFACTURER);
         device.put("model", Build.MODEL);
