@@ -19,12 +19,12 @@
   <parent>
     <groupId>de.akquinet.android.androlog</groupId>
     <artifactId>androlog-project</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
   </parent>
 
   <groupId>de.akquinet.android.androlog</groupId>
   <artifactId>androlog-it</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
 
   <name>androlog-it</name>
   <packaging>apk</packaging>
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>de.akquinet.android.androlog</groupId>
       <artifactId>androlog</artifactId>
-      <version>1.0.2-SNAPSHOT</version>
+      <version>1.0.2</version>
     </dependency>
     <dependency>
       <groupId>com.google.android</groupId>
