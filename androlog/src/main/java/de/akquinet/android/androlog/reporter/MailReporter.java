@@ -14,11 +14,16 @@
  */
 package de.akquinet.android.androlog.reporter;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Properties;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Environment;
 import de.akquinet.android.androlog.Log;
 
 /**
@@ -67,11 +72,28 @@ public class MailReporter implements Reporter {
         if (to != null) {
             String report = new Report(context, mes, err).getReportAsJSON()
                     .toString();
+            
+            String reportFilePath =
+                    Environment.getExternalStorageDirectory().getAbsolutePath()
+                            + "/androlog-report-" + System.currentTimeMillis() + ".json";
+
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.putExtra(Intent.EXTRA_SUBJECT, "Application Error Report");
-            intent.putExtra(Intent.EXTRA_TEXT, report);
             intent.putExtra(Intent.EXTRA_EMAIL, new String[] { to });
-            intent.setType("message/rfc822");
+
+            try {
+                writeStringToFile(report, reportFilePath);
+                // Add report as email attachment.
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.parse ("file://" + reportFilePath));
+                intent.putExtra(Intent.EXTRA_TEXT, "- Please add some info to this error report here, thank you -");
+                intent.setType("application/json");
+            }
+            catch (IOException e) {
+                // We could not write to SD card.
+                // Fallback: Write the report to the email body.
+                intent.putExtra(Intent.EXTRA_TEXT, report);
+                intent.setType("message/rfc822");
+            }
 
             // Create a new task because we're not sure to be an Activity
             if (!(context instanceof Activity)) {
@@ -86,6 +108,13 @@ public class MailReporter implements Reporter {
             }
         }
         return false;
+    }
+
+    private void writeStringToFile(String string, String destFilePath) throws IOException {
+        BufferedWriter out =
+                    new BufferedWriter(new FileWriter(destFilePath));
+        out.write(string);
+        out.close();
     }
 
 }
