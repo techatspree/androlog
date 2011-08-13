@@ -29,6 +29,7 @@ import android.os.Build;
 import android.view.Display;
 import android.view.WindowManager;
 import de.akquinet.android.androlog.Log;
+import de.akquinet.android.androlog.LogHelper;
 
 /**
  * Report structure.
@@ -112,7 +113,7 @@ public class Report {
         JSONObject device = new JSONObject();
         device.put("device", Build.DEVICE);
         device.put("brand", Build.BRAND);
-        
+
         Object windowService = context.getSystemService(Context.WINDOW_SERVICE);
         if (windowService instanceof WindowManager) {
             Display display = ((WindowManager)windowService).getDefaultDisplay();
@@ -163,10 +164,10 @@ public class Report {
         }
         if (err != null) {
             report.put("error", err.getMessage());
-            report.put("stackTrace",Log.getStackTraceString(err));
+            report.put("stackTrace",LogHelper.getStackTraceString(err));
             if (err.getCause() != null) {
                 report.put("cause", err.getCause().getMessage());
-                report.put("cause.stackTrace",Log.getStackTraceString(err.getCause()));
+                report.put("cause.stackTrace",LogHelper.getStackTraceString(err.getCause()));
             }
 
         }
