@@ -1,15 +1,11 @@
 Android provides an utility class to log messages. The android.util.Log provides all the required functions.
 
 Unfortunately, there is no easy way to alter the default log level from within your application or disable
-logging altogether, although this is crucial before releasing an application. This is why you should use
-androlog, which provides a class Log with the exact same API, but offers additional methods:
-- deactivateLogging() : Disable all logging.
-- activateLogging() : (Re-)activate logging.
-- setDefaultLogLevel(int logLevel) : Set the default log level. Any level below the default level will not be logged (per default).
+logging altogether, although this is crucial before releasing an application. Moreover Androlog supports reporting allowing
+you to send report about errors... Even if the Google Marketplace supports such reporting, those reports does not contain
+enough information (no log, device info...).
 
-You can also set all log levels separately for each tag / logger (more on tags below).
-By default, all logging is disabled. To enable it programmatically, use the activateLogging() method. You can also use properties
-file on the SDCard to configure the loggers.
+This is why you should use Androlog.
 
 File base configuration
 -----------------------
