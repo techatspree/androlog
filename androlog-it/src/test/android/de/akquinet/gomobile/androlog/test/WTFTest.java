@@ -19,18 +19,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import android.os.Environment;
-
-import de.akquinet.android.androlog.Log;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import android.os.Environment;
+import de.akquinet.android.androlog.Constants;
+import de.akquinet.android.androlog.Log;
 
 public class WTFTest extends TestCase {
 
     public void setUp() {
         Log.reset();
         Log.activateLogging();
-        Log.setDefaultLogLevel(Log.VERBOSE);
+        Log.setDefaultLogLevel(Constants.VERBOSE);
     }
 
     public void testWTFWhenLogActive() {
@@ -49,7 +49,7 @@ public class WTFTest extends TestCase {
     }
 
     public void testWTFWhenLogLevelSetToError() {
-        Log.setDefaultLogLevel(Log.ERROR);
+        Log.setDefaultLogLevel(Constants.ERROR);
         String tag = "de.akquinet.gomobile.androlog.test.WTFTest";
         String message = "This is a REALLY BAD error";
         int x = Log.wtf(tag, message);
@@ -57,7 +57,7 @@ public class WTFTest extends TestCase {
     }
 
     public void testWTFWhenLogLevelSetToAssert() {
-        Log.setDefaultLogLevel(Log.ASSERT);
+        Log.setDefaultLogLevel(Constants.ASSERT);
         String tag = "de.akquinet.gomobile.androlog.test.WTFTest";
         String message = "This is a REALLY BAD error";
         int x = Log.wtf(tag, message);
@@ -88,8 +88,8 @@ public class WTFTest extends TestCase {
         Log.reset();
         Log.setWTFDelegation(true);
         Properties props = new Properties();
-        props.setProperty(Log.ANDROLOG_ACTIVE, "true");
-        props.setProperty(Log.ANDROLOG_DELEGATE_WTF, "false");
+        props.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+        props.setProperty(Constants.ANDROLOG_DELEGATE_WTF, "false");
         Log.configure(props);
 
         String tag = "de.akquinet.gomobile.androlog.test.WTFTest";
@@ -104,8 +104,8 @@ public class WTFTest extends TestCase {
         Log.reset();
         Log.setWTFDelegation(true);
         Properties props = new Properties();
-        props.setProperty(Log.ANDROLOG_ACTIVE, "true");
-        props.setProperty(Log.ANDROLOG_DELEGATE_WTF, "false");
+        props.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+        props.setProperty(Constants.ANDROLOG_DELEGATE_WTF, "false");
 
         File file = new File(Environment.getExternalStorageDirectory(),
             "wtf.properties");

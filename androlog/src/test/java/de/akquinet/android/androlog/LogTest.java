@@ -38,43 +38,43 @@ public class LogTest {
     @Test
     public void testDefaultLogLevel() {
         String tag = "testLevel";
-        Log.setDefaultLogLevel(Log.DEBUG);
-        assertTrue(Log.isLoggable(tag, Log.DEBUG));
+        Log.setDefaultLogLevel(Constants.DEBUG);
+        assertTrue(Log.isLoggable(tag, Constants.DEBUG));
 
-        Log.setDefaultLogLevel(Log.INFO);
-        assertFalse(Log.isLoggable(tag, Log.DEBUG));
+        Log.setDefaultLogLevel(Constants.INFO);
+        assertFalse(Log.isLoggable(tag, Constants.DEBUG));
 
         // Test with this
-        Log.setDefaultLogLevel(Log.DEBUG);
-        assertTrue(Log.isLoggable(this, Log.DEBUG));
+        Log.setDefaultLogLevel(Constants.DEBUG);
+        assertTrue(Log.isLoggable(this, Constants.DEBUG));
 
-        Log.setDefaultLogLevel(Log.INFO);
-        assertFalse(Log.isLoggable(this, Log.DEBUG));
+        Log.setDefaultLogLevel(Constants.INFO);
+        assertFalse(Log.isLoggable(this, Constants.DEBUG));
     }
 
     @Test
     public void testDeactivation() {
         String tag = "testLevel";
-        Log.setDefaultLogLevel(Log.INFO);
+        Log.setDefaultLogLevel(Constants.INFO);
 
         Log.activateLogging();
-        assertTrue(Log.isLoggable(tag, Log.INFO));
+        assertTrue(Log.isLoggable(tag, Constants.INFO));
 
         Log.deactivateLogging();
-        assertFalse(Log.isLoggable(tag, Log.INFO));
+        assertFalse(Log.isLoggable(tag, Constants.INFO));
 
         Log.activateLogging();
-        assertTrue(Log.isLoggable(tag, Log.INFO));
+        assertTrue(Log.isLoggable(tag, Constants.INFO));
 
         // Test with this
         Log.activateLogging();
-        assertTrue(Log.isLoggable(this, Log.INFO));
+        assertTrue(Log.isLoggable(this, Constants.INFO));
 
         Log.deactivateLogging();
-        assertFalse(Log.isLoggable(this, Log.INFO));
+        assertFalse(Log.isLoggable(this, Constants.INFO));
 
         Log.activateLogging();
-        assertTrue(Log.isLoggable(this, Log.INFO));
+        assertTrue(Log.isLoggable(this, Constants.INFO));
     }
 
     @Test
@@ -87,8 +87,8 @@ public class LogTest {
         Log.reset();
         Log.configure(props);
 
-        assertTrue(Log.isLoggable("any", Log.INFO));
-        assertTrue(Log.isLoggable(this, Log.INFO));
+        assertTrue(Log.isLoggable("any", Constants.INFO));
+        assertTrue(Log.isLoggable(this, Constants.INFO));
 
     }
 
@@ -103,8 +103,8 @@ public class LogTest {
         Log.reset();
         Log.configure(props);
 
-        assertFalse(Log.isLoggable("any", Log.INFO));
-        assertFalse(Log.isLoggable(this, Log.INFO));
+        assertFalse(Log.isLoggable("any", Constants.INFO));
+        assertFalse(Log.isLoggable(this, Constants.INFO));
 
     }
 
@@ -119,8 +119,8 @@ public class LogTest {
         Log.reset();
         Log.configure(props);
 
-        assertFalse(Log.isLoggable("any", Log.INFO));
-        assertFalse(Log.isLoggable(this, Log.INFO));
+        assertFalse(Log.isLoggable("any", Constants.INFO));
+        assertFalse(Log.isLoggable(this, Constants.INFO));
 
     }
 
@@ -135,8 +135,8 @@ public class LogTest {
         Log.reset();
         Log.configure(props);
 
-        assertFalse(Log.isLoggable("any", Log.INFO));
-        assertFalse(Log.isLoggable(this, Log.INFO));
+        assertFalse(Log.isLoggable("any", Constants.INFO));
+        assertFalse(Log.isLoggable(this, Constants.INFO));
 
     }
 
@@ -150,59 +150,59 @@ public class LogTest {
         Log.configure(props);
 
         // Default set to error
-        assertFalse(Log.isLoggable("any", Log.INFO));
-        assertTrue(Log.isLoggable("any", Log.ERROR));
-        assertFalse(Log.isLoggable(this, Log.INFO));
-        assertTrue(Log.isLoggable(this, Log.ERROR));
+        assertFalse(Log.isLoggable("any", Constants.INFO));
+        assertTrue(Log.isLoggable("any", Constants.ERROR));
+        assertFalse(Log.isLoggable(this, Constants.INFO));
+        assertTrue(Log.isLoggable(this, Constants.ERROR));
 
         // Assert wrong level
-        assertFalse(Log.isLoggable("my.log.invalid", Log.INFO));
-        assertTrue(Log.isLoggable("my.log.invalid", Log.ERROR));
+        assertFalse(Log.isLoggable("my.log.invalid", Constants.INFO));
+        assertTrue(Log.isLoggable("my.log.invalid", Constants.ERROR));
 
         // Check VERBOSE
-        assertTrue(Log.isLoggable("my.log.verbose", Log.VERBOSE));
-        assertTrue(Log.isLoggable("my.log.verbose2", Log.VERBOSE));
+        assertTrue(Log.isLoggable("my.log.verbose", Constants.VERBOSE));
+        assertTrue(Log.isLoggable("my.log.verbose2", Constants.VERBOSE));
 
         // Check DEBUG
-        assertFalse(Log.isLoggable("my.log.debug", Log.VERBOSE));
-        assertFalse(Log.isLoggable("my.log.debug2", Log.VERBOSE));
-        assertTrue(Log.isLoggable("my.log.debug", Log.DEBUG));
-        assertTrue(Log.isLoggable("my.log.debug2", Log.DEBUG));
+        assertFalse(Log.isLoggable("my.log.debug", Constants.VERBOSE));
+        assertFalse(Log.isLoggable("my.log.debug2", Constants.VERBOSE));
+        assertTrue(Log.isLoggable("my.log.debug", Constants.DEBUG));
+        assertTrue(Log.isLoggable("my.log.debug2", Constants.DEBUG));
 
         // Check INFO
-        assertFalse(Log.isLoggable("my.log.info", Log.DEBUG));
-        assertFalse(Log.isLoggable("my.log.info2", Log.DEBUG));
-        assertTrue(Log.isLoggable("my.log.info", Log.INFO));
-        assertTrue(Log.isLoggable("my.log.info2", Log.INFO));
+        assertFalse(Log.isLoggable("my.log.info", Constants.DEBUG));
+        assertFalse(Log.isLoggable("my.log.info2", Constants.DEBUG));
+        assertTrue(Log.isLoggable("my.log.info", Constants.INFO));
+        assertTrue(Log.isLoggable("my.log.info2", Constants.INFO));
 
         // Check WARNING
-        assertFalse(Log.isLoggable("my.log.warn", Log.INFO));
-        assertFalse(Log.isLoggable("my.log.warn2", Log.INFO));
-        assertTrue(Log.isLoggable("my.log.warn", Log.WARN));
-        assertTrue(Log.isLoggable("my.log.warn2", Log.WARN));
+        assertFalse(Log.isLoggable("my.log.warn", Constants.INFO));
+        assertFalse(Log.isLoggable("my.log.warn2", Constants.INFO));
+        assertTrue(Log.isLoggable("my.log.warn", Constants.WARN));
+        assertTrue(Log.isLoggable("my.log.warn2", Constants.WARN));
 
         // Check ERROR
-        assertFalse(Log.isLoggable("my.log.error", Log.WARN));
-        assertFalse(Log.isLoggable("my.log.error2", Log.WARN));
-        assertTrue(Log.isLoggable("my.log.error", Log.ERROR));
-        assertTrue(Log.isLoggable("my.log.error2", Log.ERROR));
+        assertFalse(Log.isLoggable("my.log.error", Constants.WARN));
+        assertFalse(Log.isLoggable("my.log.error2", Constants.WARN));
+        assertTrue(Log.isLoggable("my.log.error", Constants.ERROR));
+        assertTrue(Log.isLoggable("my.log.error2", Constants.ERROR));
 
         // Check ASSERT
-        assertFalse(Log.isLoggable("my.log.assert", Log.ERROR));
-        assertFalse(Log.isLoggable("my.log.assert2", Log.ERROR));
-        assertTrue(Log.isLoggable("my.log.assert", Log.ASSERT));
-        assertTrue(Log.isLoggable("my.log.assert2", Log.ASSERT));
+        assertFalse(Log.isLoggable("my.log.assert", Constants.ERROR));
+        assertFalse(Log.isLoggable("my.log.assert2", Constants.ERROR));
+        assertTrue(Log.isLoggable("my.log.assert", Constants.ASSERT));
+        assertTrue(Log.isLoggable("my.log.assert2", Constants.ASSERT));
     }
 
     @Test
     public void testIsAssertLoggable() {
-        assertTrue(Log.isLoggable("any", Log.ASSERT));
+        assertTrue(Log.isLoggable("any", Constants.ASSERT));
         Log.deactivateLogging();
-        assertTrue(Log.isLoggable("any", Log.ASSERT));
-        assertTrue(Log.isLoggable(this, Log.ASSERT));
+        assertTrue(Log.isLoggable("any", Constants.ASSERT));
+        assertTrue(Log.isLoggable(this, Constants.ASSERT));
         Log.activateLogging();
-        assertTrue(Log.isLoggable("any", Log.ASSERT));
-        assertTrue(Log.isLoggable(this, Log.ASSERT));
+        assertTrue(Log.isLoggable("any", Constants.ASSERT));
+        assertTrue(Log.isLoggable(this, Constants.ASSERT));
     }
 
 }

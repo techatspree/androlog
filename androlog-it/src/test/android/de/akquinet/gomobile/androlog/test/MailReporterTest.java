@@ -25,6 +25,7 @@ import org.apache.http.auth.MalformedChallengeException;
 
 import android.os.Environment;
 import android.test.AndroidTestCase;
+import de.akquinet.android.androlog.Constants;
 import de.akquinet.android.androlog.Log;
 import de.akquinet.android.androlog.reporter.MailReporter;
 
@@ -39,16 +40,16 @@ public class MailReporterTest extends AndroidTestCase {
                     Environment.getExternalStorageDirectory().canWrite());
             // Create files
             Properties propsDefault = new Properties();
-            propsDefault.setProperty(Log.ANDROLOG_ACTIVE, "true");
-            propsDefault.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
-            propsDefault.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.NoopReporter");
+            propsDefault.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+            propsDefault.setProperty(Constants.ANDROLOG_REPORT_ACTIVE, "true");
+            propsDefault.setProperty(Constants.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.NoopReporter");
 
 
 
             Properties propsActive = new Properties();
-            propsActive.setProperty(Log.ANDROLOG_ACTIVE, "true");
-            propsActive.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
-            propsActive.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.MailReporter");
+            propsActive.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+            propsActive.setProperty(Constants.ANDROLOG_REPORT_ACTIVE, "true");
+            propsActive.setProperty(Constants.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.MailReporter");
             propsActive.setProperty(MailReporter.ANDROLOG_REPORTER_MAIL_ADDRESS, "clement.escoffier@gmail.com");
 
             testContext = new File(Environment.getExternalStorageDirectory(),

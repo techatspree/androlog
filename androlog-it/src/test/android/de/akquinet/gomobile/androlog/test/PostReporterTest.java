@@ -19,11 +19,13 @@ import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Properties;
 
+import junit.framework.Assert;
+
 import org.apache.http.auth.MalformedChallengeException;
 
-import junit.framework.Assert;
 import android.os.Environment;
 import android.test.AndroidTestCase;
+import de.akquinet.android.androlog.Constants;
 import de.akquinet.android.androlog.Log;
 import de.akquinet.android.androlog.reporter.PostReporter;
 
@@ -38,17 +40,17 @@ public class PostReporterTest extends AndroidTestCase {
                     Environment.getExternalStorageDirectory().canWrite());
             // Create files
             Properties propsDefault = new Properties();
-            propsDefault.setProperty(Log.ANDROLOG_ACTIVE, "true");
-            propsDefault.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
-            propsDefault.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.NoopReporter");
+            propsDefault.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+            propsDefault.setProperty(Constants.ANDROLOG_REPORT_ACTIVE, "true");
+            propsDefault.setProperty(Constants.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.NoopReporter");
 
 
 
             Properties propsActive = new Properties();
-            propsActive.setProperty(Log.ANDROLOG_ACTIVE, "true");
-            propsActive.setProperty(Log.ANDROLOG_REPORT_ACTIVE, "true");
-            propsActive.setProperty(Log.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.PostReporter");
-            propsActive.setProperty(Log.ANDROLOG_REPORT_EXCEPTION_HANDLER_PROPAGATION, "false");
+            propsActive.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+            propsActive.setProperty(Constants.ANDROLOG_REPORT_ACTIVE, "true");
+            propsActive.setProperty(Constants.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.PostReporter");
+            propsActive.setProperty(Constants.ANDROLOG_REPORT_EXCEPTION_HANDLER_PROPAGATION, "false");
 
             propsActive.setProperty(PostReporter.ANDROLOG_REPORTER_POST_URL, "http://androlog-reporter.appspot.com/androlog_reporter");
 

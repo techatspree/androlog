@@ -16,15 +16,16 @@ package de.akquinet.gomobile.androlog.test;
 
 import java.util.Properties;
 
-import de.akquinet.android.androlog.Log;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import de.akquinet.android.androlog.Constants;
+import de.akquinet.android.androlog.Log;
 
 public class AndrologTest extends TestCase {
 
     public void setUp() {
         Log.activateLogging();
-        Log.setDefaultLogLevel(Log.VERBOSE);
+        Log.setDefaultLogLevel(Constants.VERBOSE);
     }
 
     public void testDWithThis() {
@@ -203,7 +204,7 @@ public class AndrologTest extends TestCase {
     public void testDisablingFromConfiguration() {
         Log.reset();
         Properties props = new Properties();
-        props.setProperty(Log.ANDROLOG_ACTIVE, "false");
+        props.setProperty(Constants.ANDROLOG_ACTIVE, "false");
         Log.configure(props);
         // V
         Assert.assertEquals(0, Log.v("xxx"));
@@ -244,8 +245,8 @@ public class AndrologTest extends TestCase {
     public void testLogLevelsFromConfiguration() {
         Log.reset();
         Properties props = new Properties();
-        props.setProperty(Log.ANDROLOG_ACTIVE, "true");
-        props.setProperty(Log.ANDROLOG_DEFAULT_LEVEL, "ERROR");
+        props.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+        props.setProperty(Constants.ANDROLOG_DEFAULT_LEVEL, "ERROR");
         props.setProperty("my.log.verbose", "VERBOSE");
         props.setProperty("my.log.debug", "DEBUG");
         props.setProperty("my.log.info", "INFO");
@@ -304,8 +305,8 @@ public class AndrologTest extends TestCase {
     public void testDefaultLevelFromConfiguration() {
         Log.reset();
         Properties props = new Properties();
-        props.setProperty(Log.ANDROLOG_ACTIVE, "true");
-        props.setProperty(Log.ANDROLOG_DEFAULT_LEVEL, "ERROR");
+        props.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+        props.setProperty(Constants.ANDROLOG_DEFAULT_LEVEL, "ERROR");
         Log.configure(props);
 
         String tag = "de.akquinet.gomobile.androlog.test.AndrologTest";

@@ -22,6 +22,7 @@ import junit.framework.Assert;
 import android.content.res.AssetManager;
 import android.os.Environment;
 import android.test.AndroidTestCase;
+import de.akquinet.android.androlog.Constants;
 import de.akquinet.android.androlog.Log;
 
 public class AndrologInitTest extends AndroidTestCase {
@@ -40,16 +41,16 @@ public class AndrologInitTest extends AndroidTestCase {
                     Environment.getExternalStorageDirectory().canWrite());
             // Create files
             Properties propsDefault = new Properties();
-            propsDefault.setProperty(Log.ANDROLOG_ACTIVE, "true");
+            propsDefault.setProperty(Constants.ANDROLOG_ACTIVE, "true");
             defaultFile = new File(Environment.getExternalStorageDirectory(),
-                    Log.ANDROLOG_PROPERTIES);
+                    Constants.ANDROLOG_PROPERTIES);
             defaultFile.createNewFile();
             FileOutputStream out = new FileOutputStream(defaultFile);
             propsDefault.store(out, "Default file");
             out.close();
 
             Properties propsActive = new Properties();
-            propsActive.setProperty(Log.ANDROLOG_ACTIVE, "true");
+            propsActive.setProperty(Constants.ANDROLOG_ACTIVE, "true");
             activate = new File(Environment.getExternalStorageDirectory(),
                     "activate.properties");
             subFolder = new File(Environment.getExternalStorageDirectory(),
@@ -72,7 +73,7 @@ public class AndrologInitTest extends AndroidTestCase {
             out.close();
 
             Properties propsDeactive = new Properties();
-            propsDeactive.setProperty(Log.ANDROLOG_ACTIVE, "false");
+            propsDeactive.setProperty(Constants.ANDROLOG_ACTIVE, "false");
             deactivate = new File(Environment.getExternalStorageDirectory(),
                     "deactivate.properties");
             deactivate.createNewFile();
@@ -81,8 +82,8 @@ public class AndrologInitTest extends AndroidTestCase {
             out.close();
 
             Properties propsDefaultLevel = new Properties();
-            propsDefaultLevel.setProperty(Log.ANDROLOG_ACTIVE, "true");
-            propsDefaultLevel.setProperty(Log.ANDROLOG_DEFAULT_LEVEL, "ERROR");
+            propsDefaultLevel.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+            propsDefaultLevel.setProperty(Constants.ANDROLOG_DEFAULT_LEVEL, "ERROR");
             activateAndDefault = new File(
                     Environment.getExternalStorageDirectory(),
                     "activateAndDefault.properties");
@@ -93,8 +94,8 @@ public class AndrologInitTest extends AndroidTestCase {
             out.close();
 
             Properties propsLevels = new Properties();
-            propsLevels.setProperty(Log.ANDROLOG_ACTIVE, "true");
-            propsLevels.setProperty(Log.ANDROLOG_DEFAULT_LEVEL, "ERROR");
+            propsLevels.setProperty(Constants.ANDROLOG_ACTIVE, "true");
+            propsLevels.setProperty(Constants.ANDROLOG_DEFAULT_LEVEL, "ERROR");
             propsLevels.setProperty("my.log.verbose", "VERBOSE");
             propsLevels.setProperty("my.log.debug", "DEBUG");
             propsLevels.setProperty("my.log.info", "INFO");
@@ -131,7 +132,7 @@ public class AndrologInitTest extends AndroidTestCase {
 
     public void testDefaultInit() {
         Log.init();
-        Assert.assertEquals(Log.INFO, Log.getDefaultLogLevel());
+        Assert.assertEquals(Constants.INFO, Log.getDefaultLogLevel());
         String message = "This is a INFO test";
         String tag = "my.log.info";
         int expected = tag.length() + message.length() + 3;
@@ -195,7 +196,7 @@ public class AndrologInitTest extends AndroidTestCase {
 
     public void testInitWithActivateAndDefaultFile() {
         Log.init(activateAndDefault.getName());
-        Assert.assertEquals(Log.ERROR, Log.getDefaultLogLevel());
+        Assert.assertEquals(Constants.ERROR, Log.getDefaultLogLevel());
         String message = "This is a INFO test";
         String tag = "my.log.info";
         int expected = tag.length() + message.length() + 3;
