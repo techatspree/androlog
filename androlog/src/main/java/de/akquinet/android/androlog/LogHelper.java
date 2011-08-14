@@ -44,15 +44,15 @@ public class LogHelper {
             // Try to read the string.
             if ("VERBOSE".equalsIgnoreCase(level)) {
                 return Constants.VERBOSE;
-            } else if ("Constants.DEBUG".equalsIgnoreCase(level)) {
+            } else if ("DEBUG".equalsIgnoreCase(level)) {
                 return Constants.DEBUG;
-            } else if ("Constants.INFO".equalsIgnoreCase(level)) {
+            } else if ("INFO".equalsIgnoreCase(level)) {
                 return Constants.INFO;
-            } else if ("Constants.WARN".equalsIgnoreCase(level)) {
+            } else if ("WARN".equalsIgnoreCase(level)) {
                 return Constants.WARN;
-            } else if ("Constants.ERROR".equalsIgnoreCase(level)) {
+            } else if ("ERROR".equalsIgnoreCase(level)) {
                 return Constants.ERROR;
-            } else if ("Constants.ASSERT".equalsIgnoreCase(level)) {
+            } else if ("ASSERT".equalsIgnoreCase(level)) {
                 return Constants.ASSERT;
             }
         }

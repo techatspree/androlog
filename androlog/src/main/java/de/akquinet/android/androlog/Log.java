@@ -1098,7 +1098,7 @@ public class Log {
      *             is thrown if the tag.length() > 23.
      */
     public static boolean isLoggable(String tag, int level) {
-        if (!activated && level != Constants.ASSERT) {
+        if (! activated && level != Constants.ASSERT) {
             return false;
         }
         Integer logLevel = logLevels.get(tag);
