@@ -109,6 +109,8 @@ public class Constants {
         CLASSNAME_TO_ESCAPE.add("java.lang.Thread");
         CLASSNAME_TO_ESCAPE.add("dalvik.system.VMStack");
         CLASSNAME_TO_ESCAPE.add(Log.class.getName());
+        CLASSNAME_TO_ESCAPE.add(LogHelper.class.getName());
+        CLASSNAME_TO_ESCAPE.add(Constants.class.getName());
     };
 
 }
