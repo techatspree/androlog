@@ -19,11 +19,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import android.content.Context;
 import de.akquinet.android.androlog.Log;
@@ -79,7 +91,7 @@ public class PostReporter implements Reporter {
             String report = new Report(context, mes, err).getReportAsJSON()
                     .toString();
             try {
-                post(url, "report=" + report);
+                postReport(url, report);
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -101,6 +113,10 @@ public class PostReporter implements Reporter {
      */
     public static void post(URL url, String params) throws IOException {
         URLConnection conn = url.openConnection();
+        if (conn instanceof HttpURLConnection) {
+            ((HttpURLConnection) conn).setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type" , "application/json");
+        }
         OutputStreamWriter writer = null;
         try {
             conn.setDoOutput(true);
@@ -113,6 +129,23 @@ public class PostReporter implements Reporter {
             if (writer != null) {
                 writer.close();
             }
+        }
+    }
+
+    public static void postReport(URL url, String param) throws IOException {
+        // Create a new HttpClient and Post Header
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpPost httppost = new HttpPost(url.toExternalForm());
+
+        try {
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+            nameValuePairs.add(new BasicNameValuePair("report", param));
+            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+            // Execute HTTP Post Request
+            httpclient.execute(httppost);
+        } catch (ClientProtocolException e) {
+            throw new IOException(e.getMessage());
         }
     }
 
