@@ -24,8 +24,6 @@
 
   <groupId>de.akquinet.android.androlog</groupId>
   <artifactId>androlog-it</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
-
   <name>androlog-it</name>
   <packaging>apk</packaging>
 
