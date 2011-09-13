@@ -125,6 +125,7 @@ public class Report {
         device.put("model", Build.MODEL);
         device.put("product", Build.PRODUCT);
         device.put("build.type", Build.TYPE);
+        device.put("android.version", Build.VERSION.SDK_INT);
         report.put("device", device);
     }
 
