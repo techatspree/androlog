@@ -20,14 +20,14 @@
   <parent>
     <groupId>de.akquinet.android.androlog</groupId>
     <artifactId>androlog-project</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>de.akquinet.android.androlog</groupId>
   <artifactId>androlog</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.4</version>
+  <version>1.0.5-SNAPSHOT</version>
 
   <name>androlog-core</name>
 
