@@ -32,6 +32,8 @@ import de.akquinet.android.androlog.reporter.PostReporter;
 public class PostReporterTest extends AndroidTestCase {
 
 
+    public static final String URL = "http://chameria.spree.de:9015/reports";
+
     private File testContext;
 
     public void setUp() {
@@ -52,7 +54,7 @@ public class PostReporterTest extends AndroidTestCase {
             propsActive.setProperty(Constants.ANDROLOG_REPORT_REPORTERS, "de.akquinet.android.androlog.reporter.PostReporter");
             propsActive.setProperty(Constants.ANDROLOG_REPORT_EXCEPTION_HANDLER_PROPAGATION, "false");
 
-            propsActive.setProperty(PostReporter.ANDROLOG_REPORTER_POST_URL, "http://androlog-reporter.appspot.com/androlog_reporter");
+            propsActive.setProperty(PostReporter.ANDROLOG_REPORTER_POST_URL, URL);
 
             testContext = new File(Environment.getExternalStorageDirectory(),
                     getContext().getPackageName() + ".properties");
