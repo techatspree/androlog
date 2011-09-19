@@ -22,7 +22,6 @@
     <version>1.0.5-SNAPSHOT</version>
   </parent>
 
-  <groupId>de.akquinet.android.androlog</groupId>
   <artifactId>androlog-it</artifactId>
   <name>androlog-it</name>
   <packaging>apk</packaging>
@@ -31,7 +30,7 @@
     <dependency>
       <groupId>de.akquinet.android.androlog</groupId>
       <artifactId>androlog</artifactId>
-      <version>1.0.5-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.android</groupId>
@@ -46,7 +45,7 @@
       <plugin>
         <groupId>com.jayway.maven.plugins.android.generation2</groupId>
         <artifactId>maven-android-plugin</artifactId>
-        <version>2.8.3</version>
+        <version>3.0.0-alpha-7</version>
         <configuration>
           <sdk>
             <platform>4</platform>
@@ -55,29 +54,6 @@
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
         </configuration>
         <extensions>true</extensions>
-      </plugin>
-      <!-- Copy the dependencies to target/dependencies -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-dependencies</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>
-              <overWriteIfNewer>true</overWriteIfNewer>
-              <excludeTransitive>true</excludeTransitive>
-              <includeScope>compile</includeScope>
-              <excludeGroupIds>android,org.apache.httpcomponents,org.json</excludeGroupIds>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

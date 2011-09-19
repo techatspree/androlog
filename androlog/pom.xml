@@ -24,10 +24,8 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>de.akquinet.android.androlog</groupId>
   <artifactId>androlog</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.5-SNAPSHOT</version>
 
   <name>androlog-core</name>
 
@@ -36,6 +34,7 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.8.1</version>
+	  <scope>test</scope>
     </dependency>
   </dependencies>
 
