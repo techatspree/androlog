@@ -19,7 +19,7 @@
   <parent>
     <groupId>de.akquinet.android.androlog</groupId>
     <artifactId>androlog-project</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5</version>
   </parent>
 
   <artifactId>androlog-it</artifactId>
