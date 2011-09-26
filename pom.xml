@@ -50,6 +50,12 @@
       <artifactId>json</artifactId>
       <version>20090911-0003-SNAPSHOT</version>
       <scope>provided</scope>
+      <exclusions>
+          <exclusion>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+          </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
