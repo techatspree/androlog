@@ -1101,7 +1101,7 @@ public class Log {
         if (! activated && level != Constants.ASSERT) {
             return false;
         }
-        Integer logLevel = logLevels.get(tag);
+        Integer logLevel = getLogLevel(tag);
         if (logLevel == null) {
             logLevel = defaultLogLevel;
         }
