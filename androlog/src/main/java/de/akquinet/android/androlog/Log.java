@@ -1107,6 +1107,21 @@ public class Log {
         }
         return level >= logLevel;
     }
+    
+    /**
+     * If called with "a.b.c.d", it will test for a.b.c.d, a.b.c, a.b, a
+     */
+    private static Integer getLogLevel(String tag) {
+        Integer result = logLevels.get(tag);
+        if (tag != null && result == null) {
+            int index = tag.lastIndexOf(".");
+            while (result == null && index > -1) {
+                result = logLevels.get(tag.substring(0, index - 1));
+                index = tag.lastIndexOf(".", index - 1);
+            }
+        }
+        return result;
+    }
 
     /**
      * Checks to see whether or not a log is reportable at the specified level.
