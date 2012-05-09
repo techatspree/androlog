@@ -1116,7 +1116,7 @@ public class Log {
         if (tag != null && result == null) {
             int index = tag.lastIndexOf(".");
             while (result == null && index > -1) {
-                result = logLevels.get(tag.substring(0, index - 1));
+                result = logLevels.get(tag.substring(0, index));
                 index = tag.lastIndexOf(".", index - 1);
             }
         }
