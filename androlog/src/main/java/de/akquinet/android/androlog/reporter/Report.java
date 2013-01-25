@@ -38,60 +38,106 @@ import de.akquinet.android.androlog.LogHelper;
 public class Report {
 
     /**
-     * The Android context.
-     */
-    private Context context;
-
-    /**
      * An optional message.
      */
-    private String message;
+    private final String message;
 
     /**
      * An optional error message.
      */
-    private Throwable err;
+    private final Throwable err;
+
+    private final long created = System.currentTimeMillis();
+
+    private JSONObject report;
+    
+    private JSONObject logs;
+    
+    private JSONObject device;
+    
+    private JSONObject app;
+    
+    private JSONObject custom;
 
     /**
      * Creates a new report.
-     * All reporters share the same report object, so they <b>must</b>
-     * not modify the report.
+     *
      * @param context the context
      * @param message the message
      * @param err the error
      */
     public Report(Context context, String message, Throwable err) {
-        this.context = context;
         this.message = message;
         this.err = err;
+        buildReport(context);
     }
 
+    public void putCustom(String key, Object value) {
+        if (custom == null) {
+            custom = new JSONObject();
+            try {
+                report.put("custom", custom);
+            } catch (JSONException ex) {
+                ex.printStackTrace(); // not expected
+            }
+        }
+        try {
+            custom.put(key, value);
+        } catch (JSONException ex) {
+            try {
+                // should only happen if value is infinite or NaN
+                custom.put(key, String.valueOf(value));
+            } catch (JSONException ex1) {
+                ex1.printStackTrace(); // not expected
+            }
+        }
+    }
+    
+    public long getCreated() {
+        return created;
+    }
+    
+    public Object getDeviceKey(String key) {
+        return device.opt(key);
+    }
+    
+    public Object getAppKey(String key) {
+        return app.opt(key);
+    }
+    
+    public boolean hasException() {
+        return err != null;
+    }
+    
     /**
      * Creates the report as a JSON Object.
+     * @param context 
      * @return the json object containing the report.
      */
-    public JSONObject getReportAsJSON() {
-        JSONObject report = new JSONObject();
-
+    private void buildReport(Context context) {
         try {
-            addReportHeader(report);
-            addApplicationData(report);
-            addDeviceData(report);
-            addLog(report);
+            buildBaseReport();
+            buildApplicationData(context);
+            buildDeviceData(context);
+            buildLog();
+            report.put("application", app);
+            report.put("device", device);
+            report.put("log", logs);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+    }
+    
+    public JSONObject asJSON() {
         return report;
     }
 
     /**
      * Adds the log entries to the report.
-     * @param report the report
      * @throws JSONException if the log entries cannot be added
      */
-    private void addLog(JSONObject report) throws JSONException {
-        JSONObject logs = new JSONObject();
+    private void buildLog() throws JSONException {
+        logs = new JSONObject();
         List<String> list = Log.getReportedEntries();
         if (list != null) {
             logs.put("numberOfEntry", list.size());
@@ -101,16 +147,15 @@ public class Report {
             }
             logs.put("log", array);
         }
-        report.put("log", logs);
     }
 
     /**
      * Adds the device data to the report.
-     * @param report the report
+     * @param context 
      * @throws JSONException if the device data cannot be added
      */
-    private void addDeviceData(JSONObject report) throws JSONException {
-        JSONObject device = new JSONObject();
+    private void buildDeviceData(Context context) throws JSONException {
+        device = new JSONObject();
         device.put("device", Build.DEVICE);
         device.put("brand", Build.BRAND);
 
@@ -126,16 +171,15 @@ public class Report {
         device.put("product", Build.PRODUCT);
         device.put("build.type", Build.TYPE);
         device.put("android.version", Build.VERSION.SDK_INT);
-        report.put("device", device);
     }
 
     /**
      * Adds the application data to the report.
-     * @param report the report
+     * @param context 
      * @throws JSONException if the application data cannot be added
      */
-    private void addApplicationData(JSONObject report) throws JSONException {
-        JSONObject app = new JSONObject();
+    private void buildApplicationData(Context context) throws JSONException {
+        app = new JSONObject();
         app.put("package", context.getPackageName());
         try {
             PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
@@ -145,7 +189,6 @@ public class Report {
         } catch (NameNotFoundException e) {
             // Cannot happen as we're checking a know package.
         }
-        report.put("application", app);
     }
 
     /**
@@ -154,10 +197,11 @@ public class Report {
      * @param report the report
      * @throws JSONException if the data cannot be added
      */
-    private void addReportHeader(JSONObject report) throws JSONException {
+    private void buildBaseReport() throws JSONException {
+        report = new JSONObject();
         JSONObject dates = new JSONObject();
-        dates.put("date.system", System.currentTimeMillis());
-        dates.put("date", new Date().toString());
+        dates.put("date.system", created);
+        dates.put("date", new Date(created).toString());
         dates.put("locale", Locale.getDefault());
         report.put("dates", dates);
         if (message != null) {
@@ -173,5 +217,4 @@ public class Report {
 
         }
     }
-
 }

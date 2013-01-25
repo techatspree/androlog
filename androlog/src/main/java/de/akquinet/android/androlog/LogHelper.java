@@ -19,22 +19,31 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
+import android.text.format.DateFormat;
 
 public class LogHelper {
 
     /**
+     * format for {@link #print(int, String, String, Throwable, boolean)} timestamps; note that {@link DateFormat} 
+     * doesn't support all the formatting characters used
+     */
+    private static final String TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss,SSS'/'";
+
+    /**
      * Parses the given level to get the log level. This method supports both
      * integer level and String level.
-     *
+     * 
      * @param level
      *            the level
      * @param defaultLogLevel
-     * 			  the default log level
-     * @return the parsed level or the default level if the level cannot be
+     *            the default log level
+     * @return the parsed level or the default level if the level cannot be 
      *         parsed.
      */
     protected static int getLevel(String level, int defaultLogLevel) {
@@ -72,7 +81,7 @@ public class LogHelper {
 
     /**
      * Extracts the tag from the current stack trace.
-     *
+     * 
      * @return the qualified name of the first non escaped class on the stack.
      */
     public static String getCaller() {
@@ -80,7 +89,7 @@ public class LogHelper {
         if (stacks != null) {
             for (int i = 0; i < stacks.length; i++) {
                 String cn = stacks[i].getClassName();
-                if (cn != null && ! Constants.CLASSNAME_TO_ESCAPE.contains(cn)) {
+                if (cn != null && !Constants.CLASSNAME_TO_ESCAPE.contains(cn)) {
                     return cn;
                 }
             }
@@ -90,7 +99,7 @@ public class LogHelper {
 
     /**
      * Gets an input on a configuration file placed on the the SDCard.
-     *
+     * 
      * @param fileName
      *            the file name
      * @return the input stream to read the file or <code>null</code> if the
@@ -122,7 +131,7 @@ public class LogHelper {
 
     /**
      * Gets an input on a configuration file placed in the application assets.
-     *
+     * 
      * @param context
      *            the Android context to use
      * @param fileName
@@ -151,7 +160,7 @@ public class LogHelper {
 
     /**
      * Handy function to get a loggable stack trace from a Throwable
-     *
+     * 
      * @param tr
      *            An exception to log
      */
@@ -161,7 +170,7 @@ public class LogHelper {
 
     /**
      * Low-level logging call.
-     *
+     * 
      * @param priority
      *            The priority/type of this log message
      * @param tag
@@ -177,44 +186,43 @@ public class LogHelper {
 
     /**
      * Gets a String form of the log data.
-     *
+     * 
      * @param priority
      *            The priority/type of this log message
      * @param tag
-     *            Used to identify the source of a log message. It usually
+     *            Used to identify the source of a log message. It usually 
      *            identifies the class or activity where the log call occurs.
      * @param msg
      *            The message you would like logged.
      * @param tr
      *            The error, can be <code>null</code>
+     * @param addTimestamp
+     *            <code>true</code> to add a timestamp to the returned string, <code>false</code> otherwise
      * @return The String form.
      */
-    public static String print(int priority, String tag, String msg,
-            Throwable tr) {
+    public static String print(int priority, String tag, String msg, Throwable tr, boolean addTimestamp) {
         // Compute the letter for the given priority
         String p = "X"; // X => Unknown
         switch (priority) {
-        case Constants.DEBUG:
-            p = "D";
-            break;
-        case Constants.INFO:
-            p = "I";
-            break;
-        case Constants.WARN:
-            p = "W";
-            break;
-        case Constants.ERROR:
-            p = "E";
-            break;
-        case Constants.ASSERT:
-            p = "F";
-            break;
+            case Constants.DEBUG:
+                p = "D";
+                break;
+            case Constants.INFO:
+                p = "I";
+                break;
+            case Constants.WARN:
+                p = "W";
+                break;
+            case Constants.ERROR:
+                p = "E";
+                break;
+            case Constants.ASSERT:
+                p = "F";
+                break;
         }
-        if (tr == null) {
-            return p + "/" + tag + ": " + msg;
-        } else {
-            return p + "/" + tag + ": " + msg + "\n" + getStackTraceString(tr);
-        }
+        CharSequence timestamp = addTimestamp ? new SimpleDateFormat(TIMESTAMP_PATTERN).format(new Date()) : "";
+        String base = p + "/" + timestamp + tag + ": " + msg;
+        return tr == null ? base : base + "\n" + getStackTraceString(tr);
     }
 
 }

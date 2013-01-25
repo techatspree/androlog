@@ -26,8 +26,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import android.content.Context;
+import de.akquinet.android.androlog.reporter.EnhancedReporter;
+import de.akquinet.android.androlog.reporter.Report;
+import de.akquinet.android.androlog.reporter.ReportFactory;
 import de.akquinet.android.androlog.reporter.Reporter;
-import de.akquinet.android.androlog.reporter.ReporterFactory;
+import de.akquinet.android.androlog.reporter.InstanceFactory;
 
 /**
  * Implements a small layer on top of the <a
@@ -107,9 +110,21 @@ public class Log {
     private static boolean reportingActivated;
 
     /**
+     * <code>true</code> if logs collected for the report should have a timestamp added, <code>false</code> otherwise.
+     * may be expensive since there's no thread-safe formatter :-(
+     */
+    private static boolean addTimestampToReportLogs;
+    
+    /**
      * The list of reporters.
      */
     private static List<Reporter> reporters = new ArrayList<Reporter>(0);
+    
+    /**
+     * The report factory; must be set to use {@link EnhancedReporter#send(Context, Report)}, or <code>null</code> to
+     * use the default & call {@link Reporter#send(Context, String, Throwable)}
+     */
+    private static ReportFactory reportFactory;
 
     /**
      * The Android context.
@@ -411,7 +426,7 @@ public class Log {
             String[] senders = s.split(",");
             for (String sender : senders) {
                 String cn = sender.trim();
-                Reporter reporter = ReporterFactory.newInstance(cn);
+                Reporter reporter = InstanceFactory.newReporter(cn);
                 if (reporter != null) {
                     reporter.configure(configuration);
                     reporters.add(reporter);
@@ -450,7 +465,17 @@ public class Log {
             } else {
                 reportTriggerLevel = Constants.ASSERT;
             }
-
+            
+            if (configuration.containsKey(Constants.ANDROLOG_REPORT_FACTORY)) {
+                s = configuration.getProperty(Constants.ANDROLOG_REPORT_FACTORY);
+                reportFactory = InstanceFactory.newReportFactory(s);
+            }
+            
+            if ("true".equalsIgnoreCase(configuration
+                .getProperty(Constants.ANDROLOG_REPORT_ADD_TIMESTAMP))) {
+                addTimestampToReportLogs = true;
+            }
+            
             enableLogEntryCollection = true;
         }
 
@@ -1094,8 +1119,6 @@ public class Log {
      * @param level
      *            The level to check.
      * @return Whether or not that this is allowed to be logged.
-     * @throws IllegalArgumentException
-     *             is thrown if the tag.length() > 23.
      */
     public static boolean isLoggable(String tag, int level) {
         if (! activated && level != Constants.ASSERT) {
@@ -1107,7 +1130,7 @@ public class Log {
         }
         return level >= logLevel;
     }
-    
+
     /**
      * If called with "a.b.c.d", it will test for a.b.c.d, a.b.c, a.b, a
      */
@@ -1178,7 +1201,12 @@ public class Log {
     public static boolean report(String message, Throwable error) {
         boolean acc = true;
         for (Reporter reporter : reporters) {
-            acc = acc && reporter.send(context, message, error);
+            if (reportFactory != null && reporter instanceof EnhancedReporter) {
+                Report report = reportFactory.create(context, message, error);
+                acc = acc && ((EnhancedReporter) reporter).send(context, report);
+            } else {
+                acc = acc && reporter.send(context, message, error);
+            }
         }
         return acc;
     }
@@ -1207,7 +1235,7 @@ public class Log {
                 && entries.size() == maxOfEntriesInReports) {
             entries.remove(0); // Remove the first element.
         }
-        entries.add(LogHelper.print(level, tag, message, err));
+        entries.add(LogHelper.print(level, tag, message, err, addTimestampToReportLogs));
 
         if (level >= reportTriggerLevel) {
             // Must be in another thread
