@@ -43,7 +43,7 @@ import de.akquinet.android.androlog.Log;
 /**
  * Reporter posting the report to a given URL. It uses a plain HTTP POST.
  */
-public class PostReporter implements Reporter {
+public class PostReporter implements EnhancedReporter {
 
     /**
      * Mandatory Property to set the URL.
@@ -80,18 +80,29 @@ public class PostReporter implements Reporter {
     }
 
     /**
-     * If the reporter was configured correctly, post the report to the set URL.
-     *
+     * @see #send(Context, Report)
+     * 
      * @see de.akquinet.android.androlog.reporter.Reporter#send(android.content.Context,
      *      java.lang.String, java.lang.Throwable)
      */
     @Override
     public boolean send(Context context, String mes, Throwable err) {
+        Report report = new Report(context, mes, err);
+        return send(context, report);
+    }
+
+    /**
+     * If the reporter was configured correctly, post the report to the set URL.
+     * 
+     * @see EnhancedReporter#send(Context, Report)
+     */
+    @Override
+    public boolean send(Context context, Report report) {
         if (url != null) {
-            String report = new Report(context, mes, err).getReportAsJSON()
+            String reportStr = report.asJSON()
                     .toString();
             try {
-                postReport(url, report);
+                postReport(url, reportStr);
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
