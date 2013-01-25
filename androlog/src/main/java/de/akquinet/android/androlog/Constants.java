@@ -18,6 +18,8 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.akquinet.android.androlog.reporter.EnhancedReporter;
+import de.akquinet.android.androlog.reporter.ReportFactory;
 import de.akquinet.android.androlog.reporter.Reporter;
 
 public class Constants {
@@ -55,6 +57,11 @@ public class Constants {
      */
     public static final String ANDROLOG_REPORT_REPORTERS = "androlog.report.reporters";
     /**
+     * Property defining the {@link ReportFactory} to use. The property's value is 
+     * a {ReportFactory} class name.  Optional, but required to use an {@link EnhancedReporter}.
+     */
+    public static final String ANDROLOG_REPORT_FACTORY = "androlog.report.factory";
+    /**
      * Property setting the log level for Reports.
      */
     public static final String ANDROLOG_REPORT_DEFAULT_LEVEL = "androlog.report.default.level";
@@ -66,6 +73,10 @@ public class Constants {
      * Property activating the reporting.
      */
     public static final String ANDROLOG_REPORT_ACTIVE = "androlog.report.active";
+    /**
+     * Property activating addition of timestamps to logs collected for the report
+     */
+    public static final String ANDROLOG_REPORT_ADD_TIMESTAMP = "androlog.report.add-timestamp";
     /**
      * Property disabling the {@link UncaughtExceptionHandler}, enabled by default.
      */

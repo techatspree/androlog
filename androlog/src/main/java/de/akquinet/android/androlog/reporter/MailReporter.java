@@ -15,6 +15,7 @@
 package de.akquinet.android.androlog.reporter;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
@@ -29,7 +30,7 @@ import de.akquinet.android.androlog.Log;
 /**
  * Reporter sending the report by mail.
  */
-public class MailReporter implements Reporter {
+public class MailReporter implements EnhancedReporter {
 
     /**
      * Mandatory Property to set the <tt>to</tt> address..
@@ -60,38 +61,48 @@ public class MailReporter implements Reporter {
     }
 
     /**
+     * @see #send(Context, Report)
+     * @see de.akquinet.android.androlog.reporter.Reporter#send(Context, String, Throwable)
+     */
+    @Override
+    public boolean send(Context context, String mes, Throwable err) {
+        return send(context, new Report(context, mes, err));
+    }
+
+    /**
      * If the reporter was configured correctly, post the report to the set
      * e-mail address. IF the mail cannot be sent (no mail client), the method
      * returns <code>false</code>
      *
-     * @see de.akquinet.android.androlog.reporter.Reporter#send(android.content.Context,
-     *      java.lang.String, java.lang.Throwable)
+     * @see de.akquinet.android.androlog.reporter.EnhancedReporter#send(Context, Report)
      */
     @Override
-    public boolean send(Context context, String mes, Throwable err) {
+    public boolean send(Context context, Report report) {
         if (to != null) {
-            String report = new Report(context, mes, err).getReportAsJSON()
+            String reportStr = report.asJSON()
                     .toString();
             
             String reportFilePath =
                     Environment.getExternalStorageDirectory().getAbsolutePath()
-                            + "/androlog-report-" + System.currentTimeMillis() + ".json";
+                            + "/androlog-report-" + createReportFilenameSuffix(context, report) + ".json";
 
             Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Application Error Report");
+            intent.putExtra(Intent.EXTRA_SUBJECT, createSubject(context, report));
             intent.putExtra(Intent.EXTRA_EMAIL, new String[] { to });
 
             try {
-                writeStringToFile(report, reportFilePath);
+                File reportFile = new File(reportFilePath);
+                writeStringToFile(reportStr, reportFile);
                 // Add report as email attachment.
-                intent.putExtra(Intent.EXTRA_STREAM, Uri.parse ("file://" + reportFilePath));
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(reportFile));
                 intent.putExtra(Intent.EXTRA_TEXT, "- Please add some info to this error report here, thank you -");
                 intent.setType("application/json");
             }
             catch (IOException e) {
                 // We could not write to SD card.
                 // Fallback: Write the report to the email body.
-                intent.putExtra(Intent.EXTRA_TEXT, report);
+                e.printStackTrace();
+                intent.putExtra(Intent.EXTRA_TEXT, reportStr);
                 intent.setType("message/rfc822");
             }
 
@@ -110,9 +121,29 @@ public class MailReporter implements Reporter {
         return false;
     }
 
-    private void writeStringToFile(String string, String destFilePath) throws IOException {
+    /**
+     * Override to customise report filename suffix, which forms part of attachment name
+     * @param context the android context
+     * @param report the report being sent
+     * @return string appended to report filename (before <code>.json</code>).
+     */
+    protected String createReportFilenameSuffix(Context context, Report report) {
+        return "" + report.getCreated();
+    }
+
+    /**
+     * Override to customise email subject using application or report properties
+     * @param context the android context
+     * @param report the report being sent
+     * @return email subject
+     */
+    protected String createSubject(Context context, Report report) {
+        return "Application Error Report";
+    }
+
+    private void writeStringToFile(String string, File file) throws IOException {
         BufferedWriter out =
-                    new BufferedWriter(new FileWriter(destFilePath));
+                    new BufferedWriter(new FileWriter(file));
         out.write(string);
         out.close();
     }
