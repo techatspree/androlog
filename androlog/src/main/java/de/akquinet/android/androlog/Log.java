@@ -234,7 +234,7 @@ public class Log {
      *            the file name
      */
     public static void init(String fileName) {
-        init(null, fileName);
+        init(null, fileName != null && !fileName.endsWith(".properties") ? fileName + ".properties" : fileName);
     }
 
     /**
@@ -290,7 +290,7 @@ public class Log {
         reset();
         Log.context = context;
 
-        String file = fileName;
+        String file = fileName != null && !fileName.endsWith(".properties") ? fileName + ".properties" : fileName;
         if (file == null && context != null) {
             file = context.getPackageName() + ".properties";
         }
