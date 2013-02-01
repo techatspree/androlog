@@ -234,7 +234,7 @@ public class Log {
      *            the file name
      */
     public static void init(String fileName) {
-        init(null, fileName != null && !fileName.endsWith(".properties") ? fileName + ".properties" : fileName);
+        init(null, fileName);
     }
 
     /**
