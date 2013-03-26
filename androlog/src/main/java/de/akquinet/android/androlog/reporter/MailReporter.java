@@ -82,8 +82,11 @@ public class MailReporter implements EnhancedReporter {
             String reportStr = report.asJSON()
                     .toString();
             
+            // Create androlog folder
+            File andrologFolder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/androlog");
+            andrologFolder.mkdir();
             String reportFilePath =
-                    Environment.getExternalStorageDirectory().getAbsolutePath()
+                    andrologFolder.getPath()
                             + "/androlog-report-" + createReportFilenameSuffix(context, report) + ".json";
 
             Intent intent = new Intent(Intent.ACTION_SEND);
