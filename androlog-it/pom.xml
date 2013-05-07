@@ -19,7 +19,7 @@
   <parent>
     <groupId>de.akquinet.android.androlog</groupId>
     <artifactId>androlog-project</artifactId>
-    <version>1.0.5-5bcac64.paloma.1</version>
+    <version>1.0.6-SNAPSHOT</version>
   </parent>
 
   <artifactId>androlog-it</artifactId>
@@ -44,16 +44,18 @@
     <plugins>
       <plugin>
         <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-        <artifactId>maven-android-plugin</artifactId>
-        <version>3.0.0-alpha-7</version>
-        <configuration>
-          <sdk>
-            <platform>4</platform>
-          </sdk>
-          <deleteConflictingFiles>true</deleteConflictingFiles>
-          <undeployBeforeDeploy>true</undeployBeforeDeploy>
-        </configuration>
-        <extensions>true</extensions>
+        <artifactId>android-maven-plugin</artifactId>
+        <version>3.4.0</version>
+          <configuration>
+              <sdk>
+                  <path>${env.ANDROID_HOME}</path>
+                  <platform>1.6</platform>
+              </sdk>
+              <testSkip>false</testSkip>
+              <undeployBeforeDeploy>true</undeployBeforeDeploy>
+              <extractDuplicates>true</extractDuplicates>
+          </configuration>
+          <extensions>true</extensions>
       </plugin>
     </plugins>
   </build>

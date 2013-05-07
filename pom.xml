@@ -13,189 +13,214 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>de.akquinet.android.androlog</groupId>
-  <artifactId>androlog-project</artifactId>
-  <version>1.0.5-5bcac64.paloma.1</version>
-  <packaging>pom</packaging>
+    <groupId>de.akquinet.android.androlog</groupId>
+    <artifactId>androlog-project</artifactId>
+    <version>1.0.6-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>5</version>
-  </parent>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>5</version>
+    </parent>
 
-  <name>Androlog Project</name>
-  <description>Androlog is a customizable Log replacement for Android</description>
-  <url>http://akquinet.github.com/androlog</url>
-  <inceptionYear>2010</inceptionYear>
+    <name>Androlog Project</name>
+    <description>Androlog is a customizable Log replacement for Android</description>
+    <url>http://akquinet.github.com/androlog</url>
+    <inceptionYear>2010</inceptionYear>
 
-  <modules>
-    <module>androlog</module>
-    <module>androlog-it</module>
-  </modules>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.google.android</groupId>
-      <artifactId>android</artifactId>
-      <version>1.6_r2</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <!-- TODO Update to release -->
-      <groupId>org.ow2.chameleon.commons.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20090911-0003-SNAPSHOT</version>
-      <scope>provided</scope>
-      <exclusions>
-          <exclusion>
-            <groupId>org.json</groupId>
+    <modules>
+        <module>androlog</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <version>1.6_r2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- TODO Update to release -->
+            <groupId>org.ow2.chameleon.commons.json</groupId>
             <artifactId>json</artifactId>
-          </exclusion>
-      </exclusions>
-    </dependency>
-  </dependencies>
+            <version>20090911-0003-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 
-  <!-- TODO Temporary repository until the json lib reaches Maven Central -->
-  <repositories>
-      <repository>
-          <id>ow2.snapshots</id>
-          <name>ow2.snapshot</name>
-          <url>http://repository.ow2.org/nexus/content/repositories/snapshots/</url>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-      </repository>
-  </repositories>
-
-  <organization>
-    <name>akquinet A.G.</name>
-    <url>http://www.akquinet.de/en</url>
-  </organization>
-
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
-  <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>.</directory>
-        <targetPath>META-INF</targetPath>
-        <includes>
-          <include>LICENSE*</include>
-          <include>NOTICE*</include>
-        </includes>
-      </resource>
-    </resources>
-
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.2.1</version>
-        <configuration>
-          <useReleaseProfile>true</useReleaseProfile>
-          <goals>deploy</goals>
-		  <arguments>-Prelease</arguments>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
-  <scm>
-    <connection>scm:git:git@github.com:akquinet/androlog.git</connection>
-    <url>git@github.com:akquinet/androlog.git</url>
-    <developerConnection>scm:git:git@github.com:akquinet/androlog.git</developerConnection>
-  </scm>
-
-
-  <profiles>
-    <profile>
-      <!--  When enabled, this profile override the Sonatype distribution management   -->
-      <id>ats.nexus</id>
-      <distributionManagement>
+    <!-- TODO Temporary repository until the json lib reaches Maven Central -->
+    <repositories>
         <repository>
-          <id>${repo.releases.id}</id>
-          <name>${repo.releases.name}</name>
-          <url>${repo.releases.url}</url>
-          <uniqueVersion>false</uniqueVersion>
+            <id>ow2.snapshots</id>
+            <name>ow2.snapshot</name>
+            <url>http://repository.ow2.org/nexus/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
+    </repositories>
 
-        <snapshotRepository>
-          <id>${repo.snapshots.id}</id>
-          <name>${repo.snapshots.name}</name>
-          <url>${repo.snapshots.url}</url>
-          <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-      </distributionManagement>
-    </profile>
+    <organization>
+        <name>akquinet A.G.</name>
+        <url>http://www.akquinet.de/en</url>
+    </organization>
 
-    <profile>
-      <id>release</id>
-      <build>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.1.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.8</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>.</directory>
+                <targetPath>META-INF</targetPath>
+                <includes>
+                    <include>LICENSE*</include>
+                    <include>NOTICE*</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.2.1</version>
+                <configuration>
+                    <useReleaseProfile>true</useReleaseProfile>
+                    <goals>deploy</goals>
+                    <arguments>-Prelease</arguments>
+                </configuration>
+            </plugin>
         </plugins>
-      </build>
-    </profile>
-  </profiles>
+    </build>
+
+    <scm>
+        <connection>scm:git:git@github.com:akquinet/androlog.git</connection>
+        <url>git@github.com:akquinet/androlog.git</url>
+        <developerConnection>scm:git:git@github.com:akquinet/androlog.git</developerConnection>
+    </scm>
+
+
+    <profiles>
+        <profile>
+            <!--  When enabled, this profile override the Sonatype distribution management   -->
+            <id>ats.nexus</id>
+            <distributionManagement>
+                <repository>
+                    <id>${repo.releases.id}</id>
+                    <name>${repo.releases.name}</name>
+                    <url>${repo.releases.url}</url>
+                    <uniqueVersion>false</uniqueVersion>
+                </repository>
+
+                <snapshotRepository>
+                    <id>${repo.snapshots.id}</id>
+                    <name>${repo.snapshots.name}</name>
+                    <url>${repo.snapshots.url}</url>
+                    <uniqueVersion>false</uniqueVersion>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+
+        <profile>
+            <id>it</id>
+            <modules>
+                <module>androlog-it</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 
 </project>
