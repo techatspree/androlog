@@ -14,7 +14,10 @@
  */
 package de.akquinet.android.androlog;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -139,6 +142,30 @@ public class LogTest {
         assertFalse(Log.isLoggable(this, Constants.INFO));
 
     }
+
+//    @Test
+//    public void testDoubleInitCallDoesNotAddMultipleExceptionHandlers() throws Exception {
+//        File config = new File("src/test/resources/androlog-active.properties");
+//
+//        Thread.UncaughtExceptionHandler originalHandler = new Thread.UncaughtExceptionHandler() {
+//            @Override
+//            public void uncaughtException(Thread thread, Throwable ex) {
+//                System.out.println("I am just a dummy!");
+//            }
+//        };
+//        Thread.setDefaultUncaughtExceptionHandler(originalHandler);
+//
+//        Properties props = new Properties();
+//        props.load(new FileInputStream(config));
+//        Log.configure(props);
+//        Log.configure(props);
+//
+//        assertThat(Thread.getDefaultUncaughtExceptionHandler(), is(not(originalHandler)));
+//
+//        Log.reset();
+//
+//        assertThat(Thread.getDefaultUncaughtExceptionHandler(), is(originalHandler));
+//    }
 
     @Test
     public void testLevels() throws FileNotFoundException, IOException {

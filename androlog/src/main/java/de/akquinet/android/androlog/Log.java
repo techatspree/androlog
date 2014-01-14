@@ -151,6 +151,7 @@ public class Log {
      * enabled ?
      */
     private static boolean exceptionHandlerPropagation = true;
+    private static UncaughtExceptionHandler originalHandler;
 
 
     /**
@@ -223,6 +224,8 @@ public class Log {
         entries = null;
         reporters.clear();
         reportTriggerLevel = Constants.ASSERT;
+        Thread.setDefaultUncaughtExceptionHandler(originalHandler);
+        originalHandler = null;
     }
 
     /**
@@ -446,7 +449,7 @@ public class Log {
 
             // Define an default error handler, reporting the error.
             if (exceptionHandlerActivated) {
-                final UncaughtExceptionHandler originalHandler = Thread.getDefaultUncaughtExceptionHandler();
+                originalHandler = Thread.getDefaultUncaughtExceptionHandler();
                 Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
                     @Override
                     public void uncaughtException(Thread arg0, Throwable arg1) {
