@@ -1228,7 +1228,7 @@ public class Log {
      * @param err
      *            the error message
      */
-    private static void collectLogEntry(int level, String tag, final String message,
+    private static synchronized void collectLogEntry(int level, String tag, final String message,
             final Throwable err) {
         if (!isReportable(level)) {
             return;
