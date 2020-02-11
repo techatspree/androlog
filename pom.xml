@@ -64,7 +64,7 @@
         <repository>
             <id>ow2.snapshots</id>
             <name>ow2.snapshot</name>
-            <url>http://repository.ow2.org/nexus/content/repositories/snapshots/</url>
+            <url>https://repository.ow2.org/nexus/content/repositories/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
